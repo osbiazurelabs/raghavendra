@@ -31,13 +31,13 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/Pipeline 1')]",
+			"name": "[concat(parameters('workspaceName'), '/pl_csv_scr_config_gith')]",
 			"type": "Microsoft.Synapse/workspaces/pipelines",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"activities": [
 					{
-						"name": "Notebook1",
+						"name": "csv_scr_config",
 						"type": "SynapseNotebook",
 						"dependsOn": [],
 						"policy": {
@@ -50,7 +50,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"notebook": {
-								"referenceName": "Notebook 1",
+								"referenceName": "dev_csv_scr_config",
 								"type": "NotebookReference"
 							},
 							"snapshot": true,
@@ -70,7 +70,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('workspaceId'), '/notebooks/Notebook 1')]",
+				"[concat(variables('workspaceId'), '/notebooks/dev_csv_scr_config')]",
 				"[concat(variables('workspaceId'), '/bigDataPools/sparkrmadwdev')]"
 			]
 		},
@@ -147,7 +147,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/Notebook 1')]",
+			"name": "[concat(parameters('workspaceName'), '/dev_csv_scr_config')]",
 			"type": "Microsoft.Synapse/workspaces/notebooks",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
@@ -167,7 +167,7 @@
 						"spark.dynamicAllocation.enabled": "false",
 						"spark.dynamicAllocation.minExecutors": "2",
 						"spark.dynamicAllocation.maxExecutors": "2",
-						"spark.autotune.trackingId": "14b70194-27f3-44d9-a91d-0be2f2ba3e7d"
+						"spark.autotune.trackingId": "9b60c46f-df55-47f6-b83d-64e5060e9354"
 					}
 				},
 				"metadata": {
@@ -192,8 +192,7 @@
 						"sparkVersion": "3.5",
 						"nodeCount": 10,
 						"cores": 4,
-						"memory": 28,
-						"automaticScaleJobs": false
+						"memory": 28
 					},
 					"sessionKeepAliveTimeout": 30
 				},
