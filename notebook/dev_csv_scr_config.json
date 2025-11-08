@@ -1,5 +1,5 @@
 {
-	"name": "Notebook 1",
+	"name": "dev_csv_scr_config",
 	"properties": {
 		"nbformat": 4,
 		"nbformat_minor": 2,
@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "2266f66b-112b-4df7-bff6-d5311486f8f4"
+				"spark.autotune.trackingId": "9b60c46f-df55-47f6-b83d-64e5060e9354"
 			}
 		},
 		"metadata": {

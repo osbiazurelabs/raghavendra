@@ -1,9 +1,9 @@
 {
-	"name": "Pipeline 1",
+	"name": "pl_csv_scr_config_gith",
 	"properties": {
 		"activities": [
 			{
-				"name": "Notebook1",
+				"name": "csv_scr_config",
 				"type": "SynapseNotebook",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"notebook": {
-						"referenceName": "Notebook 1",
+						"referenceName": "dev_csv_scr_config",
 						"type": "NotebookReference"
 					},
 					"snapshot": true,
