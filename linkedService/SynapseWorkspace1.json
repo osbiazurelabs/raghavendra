@@ -1,0 +1,15 @@
+{
+	"name": "SynapseWorkspace1",
+	"properties": {
+		"annotations": [],
+		"type": "SynapseWorkspace",
+		"typeProperties": {
+			"workspaceName": "syn-rm-adw-med-dev",
+			"authenticationType": "ManagedServiceIdentity"
+		},
+		"connectVia": {
+			"referenceName": "AutoResolveIntegrationRuntime",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
