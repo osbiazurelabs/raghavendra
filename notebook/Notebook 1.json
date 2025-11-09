@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "5d11d57d-132a-4d7c-bf5d-4dca825c241d"
+				"spark.autotune.trackingId": "2b049052-95aa-495b-9e8f-84f6bb0d2bd6"
 			}
 		},
 		"metadata": {
@@ -94,7 +94,7 @@
 					"print(\"Config ready.\")\n",
 					""
 				],
-				"execution_count": 1
+				"execution_count": 13
 			},
 			{
 				"cell_type": "code",
@@ -162,7 +162,7 @@
 					"            return False\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 14
 			},
 			{
 				"cell_type": "code",
@@ -195,7 +195,19 @@
 					"    print(\"⚠️ WARNING: Could not authenticate to ADLS. Please ensure workspace-linked storage or set a secret with the storage account key.\")\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 15
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"collapsed": false
+				},
+				"source": [
+					"# Show first few rows\n",
+					"display(spark.sql(\"SELECT * FROM dev_csv_scr_config LIMIT 20\"))\n",
+					""
+				],
+				"execution_count": 17
 			},
 			{
 				"cell_type": "code",
@@ -215,7 +227,7 @@
 					"print(f\"Found {len(existing_files)} files already in RAW.\")\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 6
 			},
 			{
 				"cell_type": "code",
@@ -365,7 +377,7 @@
 					"print(f\"🔧 Prepared {len(meta_updates)} metadata update rows\")\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 7
 			},
 			{
 				"cell_type": "code",
@@ -424,7 +436,7 @@
 					"    print(\"⚠️ No metadata updates to write.\")\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 8
 			},
 			{
 				"cell_type": "code",
@@ -443,7 +455,7 @@
 					"    print(\"Preview parquet failed:\", e)\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 9
 			}
 		]
 	}
