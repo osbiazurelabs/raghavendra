@@ -1,0 +1,17 @@
+{
+	"name": "external code script",
+	"properties": {
+		"content": {
+			"query": "USE sql_dev_ondemand\n\n-- 1) (Optional) create a master key if your DB requires it (safe if already exists)\nIF NOT EXISTS (SELECT 1 FROM sys.symmetric_keys WHERE name = '##MS_DatabaseMasterKey##')\nBEGIN\n    PRINT 'Creating Database Master Key...';\n    CREATE MASTER KEY ENCRYPTION BY PASSWORD = 'ReplaceWithAVeryStrongPassword!2025';\nEND\nGO\n\n-- 2) Create DB scoped credential for Managed Identity (idempotent)\nIF NOT EXISTS (SELECT 1 FROM sys.database_scoped_credentials WHERE name = 'MyADLSManagedCred')\nBEGIN\n    PRINT 'Creating database scoped credential (Managed Identity)...';\n    CREATE DATABASE SCOPED CREDENTIAL MyADLSManagedCred WITH IDENTITY = 'Managed Identity';\nEND\nGO\n\n-- 3) Create external data source for the container (container-level)\nIF NOT EXISTS (SELECT 1 FROM sys.external_data_sources WHERE name = 'MyADLSDataSource')\nBEGIN\n    PRINT 'Creating external data source (container-level)...';\n    CREATE EXTERNAL DATA SOURCE MyADLSDataSource\n    WITH (\n        LOCATION = 'abfss://audit@adlsrmadwdev.dfs.core.windows.net/',\n        CREDENTIAL = MyADLSManagedCred\n    );\nEND\nGO\n\n-- 4) Create Parquet file format (idempotent)\nIF NOT EXISTS (SELECT 1 FROM sys.external_file_formats WHERE name = 'ParquetFormat')\nBEGIN\n    PRINT 'Creating external file format ParquetFormat...';\n    CREATE EXTERNAL FILE FORMAT ParquetFormat WITH ( FORMAT_TYPE = PARQUET );\nEND\nGO\n\nCREATE SCHEMA [ADLS_Audit]\nGO\n\ndrop EXTERNAL TABLE [ADLS_Audit].[csv_scr_file_inf]\ngo\n\nCREATE EXTERNAL TABLE [ADLS_Audit].[csv_scr_file_inf]\n(\n      CSV_File_Name       VARCHAR(500),\n      Raw_GitHub_URL      VARCHAR(1000),\n      Target_Path         VARCHAR(1000),\n      Has_Header          BIT,\n      Delimiter           VARCHAR(10),\n      Schema_Definition   VARCHAR(MAX),\n      Load_Status         VARCHAR(100),\n      Load_Timestamp      DATETIME2,\n      Comments            VARCHAR(MAX),\n      Toimport            INT,\n      DataLayer           VARCHAR(50)\n    )\nWITH\n(\n\t--LOCATION = 'abfss://audit@adlsrmadwdev.dfs.core.windows.net/csv_metadata/csv_scr_file_inf.parquet/*.parquet',\n\tLOCATION = 'https://adlsrmadwdev.blob.core.windows.net/audit/csv_metadata/csv_scr_file_inf.parquet/part-00000-b9e8151e-293c-4852-a256-3411a49deb38-c000.snappy.parquet',\n\tDATA_SOURCE = [MyADLSDataSource],\n\tFILE_FORMAT = [ParquetFormat]\n)\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "sql_dev_ondemand",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

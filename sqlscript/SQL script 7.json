@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 7",
+	"properties": {
+		"content": {
+			"query": "\n\nDROP EXTERNAL  TABLE ext_csv_scr_file_inf_test\n\n\nDROP EXTERNAL data SOURCE test\n\n\nDROP EXTERNAL FILE FORMAT TextFileFormat",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "dev_ondemand.sql.azuresynapse.net",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

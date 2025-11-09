@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 12",
+	"properties": {
+		"content": {
+			"query": "SELECT TOP (100) [CSV_File_Name]\n,[Raw_GitHub_URL]\n,[Target_Path]\n,[Has_Header]\n,[Delimiter]\n,[Schema_Definition]\n,[Load_Status]\n,[Load_Timestamp]\n,[Comments]\n,[Toimport]\n,[DataLayer]\n FROM [ADLS_Audit].[csv_scr_file_inf]",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "sql_dev_ondemand",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

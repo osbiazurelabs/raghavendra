@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 11",
+	"properties": {
+		"content": {
+			"query": "drop EXTERNAL TABLE [ADLS_Audit].[csv_scr_file_inf]\ngo\n\nCREATE EXTERNAL TABLE [ADLS_Audit].[csv_scr_file_inf]\n(\n      CSV_File_Name       VARCHAR(500),\n      Raw_GitHub_URL      VARCHAR(1000),\n      Target_Path         VARCHAR(1000),\n      Has_Header          BIT,\n      Delimiter           VARCHAR(10),\n      Schema_Definition   VARCHAR(MAX),\n      Load_Status         VARCHAR(100),\n      Load_Timestamp      DATETIME2,\n      Comments            VARCHAR(MAX),\n      Toimport            INT,\n      DataLayer           VARCHAR(50)\n    )\nWITH\n(\n\t--LOCATION = 'abfss://audit@adlsrmadwdev.dfs.core.windows.net/csv_metadata/csv_scr_file_inf.parquet/*.parquet',\n\tLOCATION = 'https://adlsrmadwdev.blob.core.windows.net/audit/csv_metadata/csv_scr_file_inf.parquet/part-00000-b9e8151e-293c-4852-a256-3411a49deb38-c000.snappy.parquet',\n\tDATA_SOURCE = [MyADLSDataSource],\n\tFILE_FORMAT = [ParquetFormat]\n)",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "sql_dev_ondemand",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
