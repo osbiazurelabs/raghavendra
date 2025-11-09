@@ -2,7 +2,7 @@
 	"name": "SQL script 5",
 	"properties": {
 		"content": {
-			"query": "SELECT TOP (100) [sno]\n,[CSV_File_Name]\n,[Raw_GitHub_URL]\n FROM [default].[dbo].[dev_csv_scr_config]",
+			"query": "SELECT TOP (100) [sno]\n,[CSV_File_Name]\n,[Raw_GitHub_URL]\n FROM [default].[dbo].[dev_csv_scr_config]\n\n\n SELECT * FROM sys.database_scoped_credentials;",
 			"metadata": {
 				"language": "sql"
 			},

@@ -7,7 +7,7 @@
 				"language": "sql"
 			},
 			"currentConnection": {
-				"databaseName": "default",
+				"databaseName": "Dev_advdw",
 				"poolName": "Built-in"
 			},
 			"resultLimit": 5000
