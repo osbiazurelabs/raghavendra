@@ -10,7 +10,8 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"folderPath": "csv_metadata/csv_scr_file_inf.parquet",
+				"fileName": "csv_scr_file_inf.parquet/*.parquet",
+				"folderPath": "csv_metadata",
 				"fileSystem": "audit"
 			},
 			"compressionCodec": "snappy"
