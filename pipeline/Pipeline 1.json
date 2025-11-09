@@ -13,13 +13,12 @@
 					"secureOutput": false,
 					"secureInput": false
 				},
-				"userProperties": [],
 				"typeProperties": {
 					"source": {
 						"type": "ParquetSource",
 						"storeSettings": {
 							"type": "AzureBlobFSReadSettings",
-							"recursive": true,
+							"fileListPath": "audit/csv_metadata/csv_scr_file_inf.parquet",
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
@@ -98,12 +97,50 @@
 										"type": "DelimitedTextReadSettings"
 									}
 								},
-								"enableStaging": false
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings",
+										"copyBehavior": "FlattenHierarchy"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
 							},
 							"inputs": [
 								{
-									"referenceName": "DelimitedText1",
-									"type": "DatasetReference"
+									"referenceName": "ds_adls_csv_param",
+									"type": "DatasetReference",
+									"parameters": {
+										"folderPath": "''",
+										"fileName": {
+											"value": "@item().Target_Path",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_adls_parquet_param",
+									"type": "DatasetReference",
+									"parameters": {
+										"folderPath": "bronze",
+										"fileName": {
+											"value": "@concat(replace(item().CSV_File_Name, '.csv', ''), '.parquet')",
+											"type": "Expression"
+										}
+									}
 								}
 							]
 						}

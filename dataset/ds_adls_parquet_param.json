@@ -1,5 +1,5 @@
 {
-	"name": "ds_adls_csv_param",
+	"name": "ds_adls_parquet_param",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "syn-rm-adw-med-dev-WorkspaceDefaultStorage",
@@ -14,12 +14,12 @@
 			}
 		},
 		"annotations": [],
-		"type": "DelimitedText",
+		"type": "Parquet",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
 				"fileName": {
-					"value": "@dataset().fileName",
+					"value": "dataset().fileName",
 					"type": "Expression"
 				},
 				"fileSystem": {
@@ -27,10 +27,7 @@
 					"type": "Expression"
 				}
 			},
-			"columnDelimiter": ",",
-			"escapeChar": "\\",
-			"firstRowAsHeader": false,
-			"quoteChar": "\""
+			"compressionCodec": "snappy"
 		},
 		"schema": []
 	}
