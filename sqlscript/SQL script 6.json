@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 6",
+	"properties": {
+		"content": {
+			"query": "CREATE EXTERNAL TABLE ext_csv_scr_file_inf\n(\n  -- you must define the column list/types here to match your target table\n  -- Example placeholders: replace with actual schema\n  CSV_File_Name    varchar(500),\n  Raw_GitHub_URL   varchar(1000),\n  Target_Path      varchar(1000),\n  Has_Header       bit,\n  Delimiter        varchar(10),\n  Schema_Definition varchar(max),\n  Load_Status      varchar(100),\n  Load_Timestamp   datetime2,\n  Comments         varchar(max),\n  Toimport         int,\n  DataLayer        varchar(50)\n)\nWITH (\n  LOCATION = 'csv_metadata/csv_scr_file_inf.parquet',  -- relative to the external data source LOCATION\n  DATA_SOURCE = MyADLSDataSource,\n  FILE_FORMAT = ParquetFormat\n);\n",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "Dev_advdw",
+				"poolName": "Built-in"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
