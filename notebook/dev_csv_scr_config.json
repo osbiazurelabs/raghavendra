@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "756c3da4-588f-4ead-b3b1-f9564216be6c"
+				"spark.autotune.trackingId": "fe869059-4e48-4760-b404-1c4c8941faa8"
 			}
 		},
 		"metadata": {
@@ -211,13 +211,14 @@
 			{
 				"cell_type": "code",
 				"metadata": {
-					"editable": false,
+					"editable": true,
 					"run_control": {
-						"frozen": true
+						"frozen": false
 					},
 					"collapsed": false
 				},
 				"source": [
+					"'''\n",
 					"# Synapse PySpark notebook cell\n",
 					"import requests\n",
 					"from pyspark.sql.types import StructType, StructField, IntegerType, StringType\n",
@@ -256,7 +257,7 @@
 					"\n",
 					"# Optional: also register a Spark table for ad-hoc queries\n",
 					"df_meta.write.mode(\"overwrite\").saveAsTable(\"dev_csv_scr_config\")  # if you want a spark catalog table\n",
-					""
+					"'''"
 				],
 				"execution_count": 1
 			},
