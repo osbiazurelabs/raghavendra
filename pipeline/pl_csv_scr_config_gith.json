@@ -24,9 +24,44 @@
 						"referenceName": "sparkrmadwdev",
 						"type": "BigDataPoolReference"
 					},
+					"executorSize": "Small",
 					"conf": {
 						"spark.dynamicAllocation.enabled": false
+					},
+					"driverSize": "Small"
+				}
+			},
+			{
+				"name": "csv_scr_file_inf",
+				"type": "SynapseNotebook",
+				"dependsOn": [
+					{
+						"activity": "csv_scr_config",
+						"dependencyConditions": [
+							"Succeeded"
+						]
 					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebook": {
+						"referenceName": "csv_scr_file_inf",
+						"type": "NotebookReference"
+					},
+					"snapshot": true,
+					"sparkPool": {
+						"referenceName": "sparkrmadwdev",
+						"type": "BigDataPoolReference"
+					},
+					"executorSize": "Small",
+					"driverSize": "Small"
 				}
 			}
 		],
