@@ -60,8 +60,10 @@
 								"type": "ParquetSource",
 								"storeSettings": {
 									"type": "AzureBlobFSReadSettings",
-									"fileListPath": "audit/csv_metadata/csv_scr_file_inf.parquet",
-									"enablePartitionDiscovery": false
+									"recursive": false,
+									"wildcardFolderPath": "audit/csv_scr_file_inf.parquet",
+									"wildcardFileName": "*",
+									"enablePartitionDiscovery": true
 								},
 								"formatSettings": {
 									"type": "ParquetReadSettings"
@@ -78,6 +80,8 @@
 					{
 						"name": "FilterToImport",
 						"type": "Filter",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "LookupMetadata",
@@ -101,6 +105,8 @@
 					{
 						"name": "ForEach1",
 						"type": "ForEach",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
 						"dependsOn": [
 							{
 								"activity": "FilterToImport",
@@ -384,7 +390,8 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"folderPath": "csv_metadata/csv_scr_file_inf.parquet",
+						"fileName": "csv_scr_file_inf.parquet/*.parquet",
+						"folderPath": "csv_metadata",
 						"fileSystem": "audit"
 					},
 					"compressionCodec": "snappy"
@@ -1772,6 +1779,18 @@
 			},
 			"dependsOn": [],
 			"location": "eastus"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Pipeline 2')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
 		}
 	]
 }
