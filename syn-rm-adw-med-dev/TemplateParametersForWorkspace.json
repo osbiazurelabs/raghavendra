@@ -5,8 +5,20 @@
 		"workspaceName": {
 			"value": "syn-rm-adw-med-dev"
 		},
+		"AzureSqlDatabase1_password": {
+			"value": ""
+		},
 		"syn-rm-adw-med-dev-WorkspaceDefaultSqlServer_connectionString": {
 			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=tcp:syn-rm-adw-med-dev.sql.azuresynapse.net,1433;Initial Catalog=@{linkedService().DBName}"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_server": {
+			"value": "syn-rm-adw-med-dev.database.windows.net"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_database": {
+			"value": "master"
+		},
+		"AzureSqlDatabase1_properties_typeProperties_userName": {
+			"value": "sqladminuser"
 		},
 		"syn-rm-adw-med-dev-WorkspaceDefaultStorage_properties_typeProperties_url": {
 			"value": "https://adlsrmadwdev.dfs.core.windows.net"
