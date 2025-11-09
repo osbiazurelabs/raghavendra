@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"notebook": {
-						"referenceName": "dev_csv_scr_config",
+						"referenceName": "Notebook 2",
 						"type": "NotebookReference"
 					},
 					"snapshot": true,
