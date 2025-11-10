@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "450ebbcf-699f-413e-b2a3-b2c3fe835370"
+				"spark.autotune.trackingId": "0b6c2ddc-07d3-4eef-9fc8-d6782f9e39cb"
 			}
 		},
 		"metadata": {
@@ -40,7 +40,7 @@
 					"authResource": "https://dev.azuresynapse.net"
 				},
 				"sparkVersion": "3.5",
-				"nodeCount": 10,
+				"nodeCount": 3,
 				"cores": 4,
 				"memory": 28,
 				"automaticScaleJobs": false
@@ -227,6 +227,13 @@
 					"    print(\"   Failed to save SQL script:\", e)\n",
 					"\n",
 					"print(\"\\nDONE — table recreated as DELTA, updated, and SQL script saved.\")\n",
+					""
+				],
+				"execution_count": null
+			},
+			{
+				"cell_type": "code",
+				"source": [
 					""
 				],
 				"execution_count": null

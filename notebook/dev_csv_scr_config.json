@@ -17,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "fe869059-4e48-4760-b404-1c4c8941faa8"
+				"spark.autotune.trackingId": "47d3a2b9-aab6-4663-bd19-43a1ca4ca811"
 			}
 		},
 		"metadata": {
@@ -40,7 +40,7 @@
 					"authResource": "https://dev.azuresynapse.net"
 				},
 				"sparkVersion": "3.5",
-				"nodeCount": 10,
+				"nodeCount": 3,
 				"cores": 4,
 				"memory": 28,
 				"automaticScaleJobs": false
@@ -260,13 +260,6 @@
 					"'''"
 				],
 				"execution_count": 1
-			},
-			{
-				"cell_type": "code",
-				"source": [
-					""
-				],
-				"execution_count": null
 			}
 		]
 	}
