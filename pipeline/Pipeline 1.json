@@ -17,23 +17,6 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"source": {
-						"type": "ParquetSource",
-						"storeSettings": {
-							"type": "AzureBlobFSReadSettings",
-							"recursive": false,
-							"wildcardFolderPath": "audit/csv_scr_file_inf.parquet",
-							"wildcardFileName": "*",
-							"enablePartitionDiscovery": true
-						},
-						"formatSettings": {
-							"type": "ParquetReadSettings"
-						}
-					},
-					"dataset": {
-						"referenceName": "ds_parquet_csv_meta",
-						"type": "DatasetReference"
-					},
 					"firstRowOnly": false
 				}
 			},
