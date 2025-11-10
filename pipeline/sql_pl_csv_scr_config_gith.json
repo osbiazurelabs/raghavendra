@@ -52,7 +52,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"notebook": {
-						"referenceName": "csv_scr_file_inf",
+						"referenceName": "sql_csv_scr_file_inf",
 						"type": "NotebookReference"
 					},
 					"snapshot": true,
