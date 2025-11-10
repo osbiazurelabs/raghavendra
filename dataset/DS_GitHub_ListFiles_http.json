@@ -3,7 +3,13 @@
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "LS_GitHub_http",
-			"type": "LinkedServiceReference"
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"repoPath": {
+					"value": "@dataset().repoPath",
+					"type": "Expression"
+				}
+			}
 		},
 		"parameters": {
 			"repoPath": {

@@ -74,7 +74,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"repoPath": {
-								"value": "@concat('/repos/', pipeline().parameters.owner, '/', pipeline().parameters.repo,\n        '/contents/', pipeline().parameters.path, '?ref=', pipeline().parameters.branch)\n",
+								"value": "@concat('/repos/', pipeline().parameters.owner, '/', pipeline().parameters.repo, '/contents/', pipeline().parameters.path, '?ref=', pipeline().parameters.branch)",
 								"type": "Expression"
 							}
 						}
@@ -167,19 +167,19 @@
 		"parameters": {
 			"owner": {
 				"type": "string",
-				"defaultValue": "\"microsoft\""
+				"defaultValue": "microsoft"
 			},
 			"repo": {
 				"type": "string",
-				"defaultValue": "\"sql-server-samples\""
+				"defaultValue": "sql-server-samples"
 			},
 			"path": {
 				"type": "string",
-				"defaultValue": "\"samples/databases/adventure-works/oltp-install-script\""
+				"defaultValue": "samples/databases/adventure-works/oltp-install-script"
 			},
 			"branch": {
 				"type": "string",
-				"defaultValue": "\"master\""
+				"defaultValue": "master"
 			}
 		},
 		"annotations": []
