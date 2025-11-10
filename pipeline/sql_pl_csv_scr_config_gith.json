@@ -1,5 +1,5 @@
 {
-	"name": "pl_csv_scr_config_gith_copy1",
+	"name": "sql_pl_csv_scr_config_gith",
 	"properties": {
 		"activities": [
 			{
@@ -34,8 +34,6 @@
 			{
 				"name": "csv_scr_file_inf",
 				"type": "SynapseNotebook",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "csv_scr_config",

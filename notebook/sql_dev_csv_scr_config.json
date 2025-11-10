@@ -3,6 +3,10 @@
 	"properties": {
 		"nbformat": 4,
 		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "sparkrmadwdev",
+			"type": "BigDataPoolReference"
+		},
 		"sessionProperties": {
 			"driverMemory": "28g",
 			"driverCores": 4,
@@ -13,7 +17,7 @@
 				"spark.dynamicAllocation.enabled": "false",
 				"spark.dynamicAllocation.minExecutors": "2",
 				"spark.dynamicAllocation.maxExecutors": "2",
-				"spark.autotune.trackingId": "e23c0a40-fda0-4d7f-a668-5ed5a769c9e0"
+				"spark.autotune.trackingId": "3d943fbb-2da4-4c0b-91e0-58bd27c385c2"
 			}
 		},
 		"metadata": {
@@ -21,16 +25,34 @@
 			"enableDebugMode": false,
 			"kernelspec": {
 				"name": "synapse_pyspark",
-				"display_name": "python"
+				"display_name": "Synapse PySpark"
 			},
 			"language_info": {
 				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/f2dcf14e-c010-4080-bb14-de61bf467b98/resourceGroups/rg-rm-adw-med-dev/providers/Microsoft.Synapse/workspaces/syn-rm-adw-med-dev/bigDataPools/sparkrmadwdev",
+				"name": "sparkrmadwdev",
+				"type": "Spark",
+				"endpoint": "https://syn-rm-adw-med-dev.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/sparkrmadwdev",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net"
+				},
+				"sparkVersion": "3.5",
+				"nodeCount": 3,
+				"cores": 4,
+				"memory": 28,
+				"automaticScaleJobs": false
 			},
 			"sessionKeepAliveTimeout": 30
 		},
 		"cells": [
 			{
 				"cell_type": "code",
+				"metadata": {
+					"collapsed": false
+				},
 				"source": [
 					"# ====================== END-TO-END NOTEBOOK (SQL AUTH VERSION) ======================\n",
 					"import requests, traceback, os\n",
@@ -118,7 +140,7 @@
 					"# ====================== END OF NOTEBOOK ======================\n",
 					""
 				],
-				"execution_count": null
+				"execution_count": 1
 			}
 		]
 	}
