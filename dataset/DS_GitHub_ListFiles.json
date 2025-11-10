@@ -3,10 +3,7 @@
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "LS_GitHub_REST",
-			"type": "LinkedServiceReference",
-			"parameters": {
-				"repoPath": "repos/microsoft/sql-server-samples/contents/samples/databases/adventure-works/oltp-install-script?ref=master"
-			}
+			"type": "LinkedServiceReference"
 		},
 		"annotations": [],
 		"type": "RestResource",

@@ -1,0 +1,23 @@
+{
+	"name": "DS_GitHub_ListFiles_http",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_GitHub_http",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"repoPath": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "HttpServerLocation",
+				"relativeUrl": "/repos/microsoft/sql-server-samples/contents/samples/databases/adventure-works/oltp-install-script?ref=master"
+			}
+		},
+		"schema": {}
+	}
+}

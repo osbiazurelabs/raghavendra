@@ -1,10 +1,12 @@
 {
-	"name": "Pipeline 2",
+	"name": "PL_GetGitHubCsvs_To_SQL",
 	"properties": {
 		"activities": [
 			{
 				"name": "Copy data1",
 				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -24,6 +26,11 @@
 							"supportRFC5988": "true"
 						}
 					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"sqlWriterStoredProcedureName": "[dbo].[sp_upsert_dev_csv_scr_config]",
+						"disableMetricsCollection": false
+					},
 					"enableStaging": false
 				},
 				"inputs": [
@@ -31,9 +38,63 @@
 						"referenceName": "DS_GitHub_ListFiles",
 						"type": "DatasetReference"
 					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_SQL_dev_csv_scr_config",
+						"type": "DatasetReference"
+					}
 				]
+			},
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "HttpReadSettings",
+							"requestMethod": "GET"
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_GitHub_ListFiles_http",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
 			}
 		],
+		"parameters": {
+			"owner": {
+				"type": "string",
+				"defaultValue": "\"microsoft\""
+			},
+			"repo": {
+				"type": "string",
+				"defaultValue": "\"sql-server-samples\""
+			},
+			"path": {
+				"type": "string",
+				"defaultValue": "\"samples/databases/adventure-works/oltp-install-script\""
+			},
+			"branch": {
+				"type": "string",
+				"defaultValue": "\"master\""
+			}
+		},
 		"annotations": []
 	}
 }

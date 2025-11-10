@@ -1,0 +1,30 @@
+{
+	"name": "DS_SQL_dev_csv_scr_config",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_rmsqlazure",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "CSV_File_Name",
+				"type": "nvarchar"
+			},
+			{
+				"name": "Raw_GitHub_URL",
+				"type": "nvarchar"
+			},
+			{
+				"name": "InsertedOn",
+				"type": "datetime2",
+				"scale": 7
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "dev_csv_scr_config_1"
+		}
+	}
+}
