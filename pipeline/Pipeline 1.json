@@ -101,20 +101,7 @@
 									}
 								},
 								"enableStaging": false
-							},
-							"outputs": [
-								{
-									"referenceName": "ds_adls_parquet_param",
-									"type": "DatasetReference",
-									"parameters": {
-										"folderPath": "bronze",
-										"fileName": {
-											"value": "@concat(replace(item().CSV_File_Name, '.csv', ''), '.parquet')",
-											"type": "Expression"
-										}
-									}
-								}
-							]
+							}
 						}
 					]
 				}
