@@ -47,7 +47,7 @@
 				]
 			},
 			{
-				"name": "Lookup1",
+				"name": "GetFiles",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -71,9 +71,96 @@
 					},
 					"dataset": {
 						"referenceName": "DS_GitHub_ListFiles_http",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"repoPath": {
+								"value": "@concat('/repos/', pipeline().parameters.owner, '/', pipeline().parameters.repo,\n        '/contents/', pipeline().parameters.path, '?ref=', pipeline().parameters.branch)\n",
+								"type": "Expression"
+							}
+						}
 					},
 					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "OnlyCSVs",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "GetFiles",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GetFiles').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@endsWith(item().name, '.csv')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ProcessEachCSV",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "OnlyCSVs",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('OnlyCSVs').output.Value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "sp_upsert_dev_csv_scr_config",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[sp_upsert_dev_csv_scr_config]",
+								"storedProcedureParameters": {
+									"CSV_File_Name": {
+										"value": {
+											"value": "@item().name",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"Raw_GitHub_URL": {
+										"value": {
+											"value": "@item().download_url",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ls_rmsqlazure",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
 				}
 			}
 		],
