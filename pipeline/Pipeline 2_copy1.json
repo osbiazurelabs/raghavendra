@@ -1,5 +1,5 @@
 {
-	"name": "Pipeline 2",
+	"name": "Pipeline 2_copy1",
 	"properties": {
 		"activities": [
 			{
@@ -90,14 +90,13 @@
 							"userProperties": [],
 							"typeProperties": {
 								"source": {
-									"type": "DelimitedTextSource",
+									"type": "JsonSource",
 									"storeSettings": {
-										"type": "AzureBlobFSReadSettings",
-										"recursive": true,
-										"enablePartitionDiscovery": false
+										"type": "HttpReadSettings",
+										"requestMethod": "GET"
 									},
 									"formatSettings": {
-										"type": "DelimitedTextReadSettings"
+										"type": "JsonReadSettings"
 									},
 									"requestMethod": "GET"
 								},
@@ -113,26 +112,31 @@
 										"fileExtension": ".csv"
 									}
 								},
-								"enableStaging": false,
-								"translator": {
-									"type": "TabularTranslator",
-									"typeConversion": true,
-									"typeConversionSettings": {
-										"allowDataTruncation": true,
-										"treatBooleanAsNumber": false
-									}
-								}
+								"enableStaging": false
 							},
 							"inputs": [
 								{
-									"referenceName": "DS_ADLS_Raw",
-									"type": "DatasetReference"
+									"referenceName": "DS_GitHub_File_http",
+									"type": "DatasetReference",
+									"parameters": {
+										"fileUrl": {
+											"value": "item().fileUrl",
+											"type": "Expression"
+										}
+									}
 								}
 							],
 							"outputs": [
 								{
 									"referenceName": "DS_ADLS_Raw",
-									"type": "DatasetReference"
+									"type": "DatasetReference",
+									"parameters": {
+										"folderPath": {
+											"value": "@concat(pipeline().parameters.rawBasePath, '/', pipeline().parameters.owner, '/', pipeline().parameters.repo, '/', formatDateTime(utcNow(),'yyyy/MM/dd'))\n",
+											"type": "Expression"
+										},
+										"fileName": "@item().name"
+									}
 								}
 							]
 						},
@@ -149,7 +153,9 @@
 							],
 							"policy": {
 								"retry": 0,
-								"retryIntervalInSeconds": 30
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
 							},
 							"userProperties": [],
 							"typeProperties": {
@@ -157,6 +163,10 @@
 									"referenceName": "DS_ADLS_Raw",
 									"type": "DatasetReference",
 									"parameters": {
+										"folderPath": {
+											"value": "@concat(pipeline().parameters.rawBasePath, '/', pipeline().parameters.owner, '/', pipeline().parameters.repo, '/', formatDateTime(utcNow(),'yyyy/MM/dd'))\n",
+											"type": "Expression"
+										},
 										"fileName": {
 											"value": "@item().name",
 											"type": "Expression"
@@ -164,13 +174,18 @@
 									}
 								},
 								"fieldList": [
-									"size",
-									"lastModified"
+									"lastModified",
+									{
+										"value": "@item().size",
+										"type": "Expression"
+									}
 								],
 								"storeSettings": {
 									"type": "AzureBlobFSReadSettings",
-									"recursive": true,
 									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
 								}
 							}
 						},
@@ -187,11 +202,13 @@
 							],
 							"policy": {
 								"retry": 0,
-								"retryIntervalInSeconds": 30
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[dbo].[sp_upsert_dev_csv_scr_config]",
+								"storedProcedureName": "[dbo].[sp_upsert_dev_csv_scr_config1]",
 								"storedProcedureParameters": {
 									"CSV_File_Name": {
 										"value": {

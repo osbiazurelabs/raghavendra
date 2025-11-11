@@ -1,0 +1,24 @@
+{
+	"name": "DS_GitHub_File_http",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_github",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"fileUrl": {
+				"type": "string",
+				"defaultValue": "https://raw.githubusercontent.com"
+			}
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "HttpServerLocation",
+				"relativeUrl": "https://raw.githubusercontent.com"
+			}
+		},
+		"schema": {}
+	}
+}

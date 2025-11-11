@@ -10,10 +10,10 @@
 			}
 		},
 		"parameters": {
-			"fileName": {
+			"folderPath": {
 				"type": "string"
 			},
-			"fileUrl": {
+			"fileName": {
 				"type": "string"
 			}
 		},
