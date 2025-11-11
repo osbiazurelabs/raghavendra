@@ -1,5 +1,5 @@
 {
-	"name": "DS_ADLS_Raw",
+	"name": "Binary1",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ls_adls",
@@ -24,24 +24,11 @@
 			}
 		},
 		"annotations": [],
-		"type": "DelimitedText",
+		"type": "Binary",
 		"typeProperties": {
 			"location": {
-				"type": "AzureBlobFSLocation",
-				"fileName": {
-					"value": "@dataset().fileName",
-					"type": "Expression"
-				},
-				"fileSystem": {
-					"value": "@dataset().fileName",
-					"type": "Expression"
-				}
-			},
-			"columnDelimiter": ",",
-			"escapeChar": "\\",
-			"firstRowAsHeader": true,
-			"quoteChar": "\""
-		},
-		"schema": []
+				"type": "AzureBlobFSLocation"
+			}
+		}
 	}
 }
