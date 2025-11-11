@@ -94,7 +94,69 @@
 						"referenceName": "04_sql_table_metadata",
 						"type": "NotebookReference"
 					},
-					"snapshot": true
+					"snapshot": true,
+					"conf": {
+						"spark.dynamicAllocation.enabled": null,
+						"spark.dynamicAllocation.minExecutors": null,
+						"spark.dynamicAllocation.maxExecutors": null
+					},
+					"numExecutors": null
+				}
+			},
+			{
+				"name": "update_script_toimport",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "sql_table_metadata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "ls_rmsqlazure",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "Query",
+							"text": "UPDATE [dbo].[csv_scr_file_inf]\n    SET Toimport = 0\nWHERE CSV_File_Name IN ('JobCandidate_TOREMOVE.csv', 'ProductModelorg.csv','AWBuildVersion.csv')\n"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "bronze_ingestion",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "update_script_toimport",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "bronze_ingestion",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
 				}
 			}
 		],
