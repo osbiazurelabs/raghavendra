@@ -129,7 +129,7 @@
 											"type": "Expression"
 										},
 										"fileName": {
-											"value": "@item().name",
+											"value": "@item().name\n",
 											"type": "Expression"
 										}
 									}
@@ -157,26 +157,19 @@
 							"typeProperties": {
 								"dataset": {
 									"referenceName": "DS_ADLS_Raw",
-									"type": "DatasetReference",
-									"parameters": {
-										"folderPath": {
-											"value": "@concat(pipeline().parameters.rawBasePath, '/', pipeline().parameters.owner, '/', pipeline().parameters.repo, '/', formatDateTime(utcNow(),'yyyy/MM/dd'))",
-											"type": "Expression"
-										},
-										"fileName": {
-											"value": "@item().name",
-											"type": "Expression"
-										}
-									}
+									"type": "DatasetReference"
 								},
 								"fieldList": [
-									"size",
-									"lastModified"
+									"lastModified",
+									"childItems"
 								],
 								"storeSettings": {
 									"type": "AzureBlobFSReadSettings",
 									"recursive": false,
 									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
 								}
 							}
 						},
@@ -277,7 +270,7 @@
 			},
 			"storageAccount": {
 				"type": "string",
-				"defaultValue": "https://adlsrmadwdev.blob.core.windows.net"
+				"defaultValue": "adlsrmadwdev.dfs.core.windows.net"
 			},
 			"rawBasePath": {
 				"type": "string",
