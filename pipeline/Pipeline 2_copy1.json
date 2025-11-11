@@ -113,7 +113,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"fileUrl": {
-											"value": "@replace(item().download_url, 'https://raw.githubusercontent.com/', '')",
+											"value": "@item().download_url",
 											"type": "Expression"
 										}
 									}
@@ -157,7 +157,17 @@
 							"typeProperties": {
 								"dataset": {
 									"referenceName": "DS_ADLS_Raw",
-									"type": "DatasetReference"
+									"type": "DatasetReference",
+									"parameters": {
+										"folderPath": {
+											"value": "@item()",
+											"type": "Expression"
+										},
+										"fileName": {
+											"value": "@item()",
+											"type": "Expression"
+										}
+									}
 								},
 								"fieldList": [
 									"lastModified",
