@@ -5,8 +5,14 @@
 			"referenceName": "ls_adls",
 			"type": "LinkedServiceReference",
 			"parameters": {
-				"folderPath": "raw/2025/11/11",
-				"fileName": "MyFile.csv"
+				"folderPath": {
+					"value": "@dataset().folderPath",
+					"type": "Expression"
+				},
+				"fileName": {
+					"value": "@dataset().folderPath",
+					"type": "Expression"
+				}
 			}
 		},
 		"parameters": {
