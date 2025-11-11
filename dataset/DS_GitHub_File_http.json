@@ -3,7 +3,13 @@
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ls_github",
-			"type": "LinkedServiceReference"
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"fileUrl": {
+					"value": "@dataset().fileUrl",
+					"type": "Expression"
+				}
+			}
 		},
 		"parameters": {
 			"fileUrl": {
