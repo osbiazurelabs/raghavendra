@@ -1,0 +1,33 @@
+{
+	"name": "DS_ADLS_Raw",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_adls",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"folderPath": "raw/2025/11/11",
+				"fileName": "MyFile.csv"
+			}
+		},
+		"parameters": {
+			"fileName": {
+				"type": "string"
+			},
+			"fileUrl": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
