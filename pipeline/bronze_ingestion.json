@@ -1,6 +1,28 @@
 {
 	"name": "bronze_ingestion",
 	"properties": {
+		"activities": [
+			{
+				"name": "csv_parquet",
+				"type": "DatabricksNotebook",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"notebookPath": "/Users/alc1762422883_1762422887449@npalchemy.onmicrosoft.com/RaghavenderM/bronze_ingestion"
+				},
+				"linkedServiceName": {
+					"referenceName": "ls_databrciks_parquet",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
 		"annotations": []
 	}
 }
