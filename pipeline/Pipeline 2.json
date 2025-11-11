@@ -1,0 +1,296 @@
+{
+	"name": "Pipeline 2",
+	"properties": {
+		"description": "End-to-end pipeline: list files from GitHub, filter CSVs, copy each file to ADLS (binary safe), get metadata, upsert metadata to SQL.",
+		"activities": [
+			{
+				"name": "GetFiles",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "HttpReadSettings",
+							"requestMethod": "GET"
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "DS_GitHub_ListFiles_http",
+						"type": "DatasetReference",
+						"parameters": {
+							"repoPath": {
+								"value": "@concat('/repos/', pipeline().parameters.owner, '/', pipeline().parameters.repo, '/contents/', pipeline().parameters.path, '?ref=', pipeline().parameters.branch)",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "OnlyCSVs",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "GetFiles",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GetFiles').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@endsWith(item().name, '.csv')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ProcessEachCSV",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "OnlyCSVs",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('OnlyCSVs').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "CopyFileToADLS",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 1,
+								"retryIntervalInSeconds": 30
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "HttpSource",
+									"httpRequestTimeout": "00:01:40",
+									"requestMethod": "GET",
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".csv"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "DS_GitHub_File_http",
+									"type": "DatasetReference",
+									"parameters": {
+										"relativeUrl": {
+											"value": "@replace(trim(item().download_url), ' ', '')",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_ADLS_Raw",
+									"type": "DatasetReference",
+									"parameters": {
+										"folderPath": {
+											"value": "@concat(pipeline().parameters.rawBasePath,'/',pipeline().parameters.owner,'/',pipeline().parameters.repo,'/',formatDateTime(utcNow(),'yyyy/MM/dd'))",
+											"type": "Expression"
+										},
+										"fileName": {
+											"value": "@item().name",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "GetFileMetadata",
+							"type": "GetMetadata",
+							"dependsOn": [
+								{
+									"activity": "CopyFileToADLS",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "DS_ADLS_Raw",
+									"type": "DatasetReference",
+									"parameters": {
+										"folderPath": {
+											"value": "@concat(pipeline().parameters.rawBasePath,'/',pipeline().parameters.owner,'/',pipeline().parameters.repo,'/',formatDateTime(utcNow(),'yyyy/MM/dd'))",
+											"type": "Expression"
+										},
+										"fileName": {
+											"value": "@item().name",
+											"type": "Expression"
+										}
+									}
+								},
+								"fieldList": [
+									"lastModified",
+									"size"
+								],
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": false,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							}
+						},
+						{
+							"name": "sp_upsert_dev_csv_scr_config",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "GetFileMetadata",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[sp_upsert_dev_csv_scr_config1]",
+								"storedProcedureParameters": {
+									"CSV_File_Name": {
+										"value": {
+											"value": "@item().name",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"Raw_GitHub_URL": {
+										"value": {
+											"value": "@item().download_url",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"ADLS_Path": {
+										"value": {
+											"value": "@concat('abfss://',pipeline().parameters.adlsContainer,'@',pipeline().parameters.storageAccount,'/',pipeline().parameters.rawBasePath,'/',pipeline().parameters.owner,'/',pipeline().parameters.repo,'/',formatDateTime(utcNow(),'yyyy/MM/dd'),'/',item().name)",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"FileSizeBytes": {
+										"value": {
+											"value": "@activity('GetFileMetadata').output.size",
+											"type": "Expression"
+										},
+										"type": "Int"
+									},
+									"LastModifiedUTC": {
+										"value": {
+											"value": "@activity('GetFileMetadata').output.lastModified",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"IngestedOnUTC": {
+										"value": {
+											"value": "@utcNow()",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "ls_rmsqlazure",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"owner": {
+				"type": "string",
+				"defaultValue": "microsoft"
+			},
+			"repo": {
+				"type": "string",
+				"defaultValue": "sql-server-samples"
+			},
+			"path": {
+				"type": "string",
+				"defaultValue": "samples/databases/adventure-works/oltp-install-script"
+			},
+			"branch": {
+				"type": "string",
+				"defaultValue": "master"
+			},
+			"adlsContainer": {
+				"type": "string",
+				"defaultValue": "bronze"
+			},
+			"storageAccount": {
+				"type": "string",
+				"defaultValue": "adlsrmadwdev.dfs.core.windows.net"
+			},
+			"rawBasePath": {
+				"type": "string",
+				"defaultValue": "raw"
+			}
+		},
+		"annotations": []
+	}
+}
