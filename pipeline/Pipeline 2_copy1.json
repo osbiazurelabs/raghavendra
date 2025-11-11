@@ -112,8 +112,8 @@
 									"referenceName": "DS_GitHub_File_http",
 									"type": "DatasetReference",
 									"parameters": {
-										"fileUrl": {
-											"value": "@item().download_url",
+										"relativeUrl": {
+											"value": "@replace(trim(item().download_url), ' ', '')",
 											"type": "Expression"
 										}
 									}

@@ -6,13 +6,13 @@
 			"type": "LinkedServiceReference",
 			"parameters": {
 				"fileUrl": {
-					"value": "@dataset().fileUrl",
+					"value": "@dataset().relativeUrl",
 					"type": "Expression"
 				}
 			}
 		},
 		"parameters": {
-			"fileUrl": {
+			"relativeUrl": {
 				"type": "string"
 			}
 		},
