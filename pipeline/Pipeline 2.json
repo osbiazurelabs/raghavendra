@@ -122,7 +122,17 @@
 							"outputs": [
 								{
 									"referenceName": "Binary1",
-									"type": "DatasetReference"
+									"type": "DatasetReference",
+									"parameters": {
+										"folderPath": {
+											"value": "@concat(pipeline().parameters.rawBasePath, '/', pipeline().parameters.owner, '/', pipeline().parameters.repo, '/', formatDateTime(utcNow(),'yyyy/MM/dd'))\n",
+											"type": "Expression"
+										},
+										"fileName": {
+											"value": "@item().name\n",
+											"type": "Expression"
+										}
+									}
 								}
 							]
 						},
