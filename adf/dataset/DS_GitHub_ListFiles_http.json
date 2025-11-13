@@ -3,19 +3,17 @@
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "LS_GitHub_http",
-			"type": "LinkedServiceReference",
-			"parameters": {
-				"repoPath": {
-					"value": "@concat('/repos/', pipeline().parameters.owner, '/', pipeline().parameters.repo, '/contents/', pipeline().parameters.path, '?ref=', pipeline().parameters.branch)",
-					"type": "Expression"
-				}
-			}
+			"type": "LinkedServiceReference"
 		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
-				"type": "HttpServerLocation"
+				"type": "HttpServerLocation",
+				"relativeUrl": {
+					"value": "@concat('/repos/', pipeline().parameters.owner, '/', pipeline().parameters.repo, '/contents/', pipeline().parameters.path, '?ref=', pipeline().parameters.branch)",
+					"type": "Expression"
+				}
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",

@@ -14,7 +14,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "JsonSource",
+						"type": "DelimitedTextSource",
 						"storeSettings": {
 							"type": "HttpReadSettings",
 							"requestMethod": "GET"
