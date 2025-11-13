@@ -1,0 +1,9 @@
+{
+	"name": "adf-rm-adw-med-dev",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "bd13b1f6-b16e-4192-8420-e1b4599d8ddf",
+		"tenantId": "0223fd63-dec0-4282-accb-460fb4f20168"
+	}
+}
