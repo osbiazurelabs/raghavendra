@@ -1,0 +1,21 @@
+{
+	"name": "ds_github_list",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_GitHub_http",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "HttpServerLocation",
+				"relativeUrl": {
+					"value": "concat('/repos/', dataset().owner, '/', dataset().repo, '/contents/', dataset().path)",
+					"type": "Expression"
+				}
+			}
+		},
+		"schema": {}
+	}
+}

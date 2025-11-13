@@ -1,0 +1,55 @@
+{
+	"name": "pipeline2",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lookup1",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "HttpReadSettings",
+							"requestMethod": "GET"
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "ds_github_list",
+						"type": "DatasetReference"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"owner": {
+				"type": "string",
+				"defaultValue": "microsoft"
+			},
+			"repo": {
+				"type": "string",
+				"defaultValue": "sql-server-samples"
+			},
+			"path": {
+				"type": "string",
+				"defaultValue": "samples/databases/adventure-works/oltp-install-script"
+			},
+			"branch": {
+				"type": "string",
+				"defaultValue": "master"
+			}
+		},
+		"annotations": []
+	}
+}
