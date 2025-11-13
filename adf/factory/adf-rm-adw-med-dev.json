@@ -1,5 +1,13 @@
 {
 	"name": "adf-rm-adw-med-dev",
+	"properties": {
+		"globalParameters": {
+			"source_system": {
+				"type": "string",
+				"value": "RM_ADW"
+			}
+		}
+	},
 	"location": "eastus",
 	"identity": {
 		"type": "SystemAssigned",
