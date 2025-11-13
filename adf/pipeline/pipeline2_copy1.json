@@ -1,0 +1,210 @@
+{
+	"name": "pipeline2_copy1",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetRepoFileList",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "HttpReadSettings",
+							"requestMethod": "GET"
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "ds_github_list",
+						"type": "DatasetReference",
+						"parameters": {
+							"owner": {
+								"value": "microsoft",
+								"type": "Expression"
+							},
+							"repo": "sql-server-samples",
+							"path": "samples/databases/adventure-works/oltp-install-script"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "OnlyCSVs",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "GetRepoFileList",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GetRepoFileList').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@endsWith(item().name, '.csv')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ProcessEachCSV",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "OnlyCSVs",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('OnlyCSVs').output.Value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 4,
+					"activities": [
+						{
+							"name": "Copy data1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "HttpReadSettings",
+										"maxConcurrentConnections": 5,
+										"requestMethod": "GET",
+										"requestTimeout": ""
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_github_raw_file",
+									"type": "DatasetReference",
+									"parameters": {
+										"owner": {
+											"value": "@pipeline().parameters.owner",
+											"type": "Expression"
+										},
+										"repo": {
+											"value": "@pipeline().parameters.repo",
+											"type": "Expression"
+										},
+										"branch": {
+											"value": "@pipeline().parameters.branch",
+											"type": "Expression"
+										},
+										"path": {
+											"value": "@item().path",
+											"type": "Expression"
+										},
+										"fileName": "''"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_adls_raw_csv",
+									"type": "DatasetReference",
+									"parameters": {
+										"folderPath": {
+											"value": "@concat('raw/', pipeline().parameters.source_system, '/', formatDateTime(utcNow(),'yyyy/MM/dd'))\n",
+											"type": "Expression"
+										},
+										"fileName": {
+											"value": "@concat(pipeline().parameters.project, '_', item().name)\n",
+											"type": "Expression"
+										},
+										"delimiter": {
+											"value": "','\n",
+											"type": "Expression"
+										},
+										"hasHeader": {
+											"value": "false\n",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"source_system": {
+				"type": "string",
+				"defaultValue": "RM_ADW"
+			},
+			"project": {
+				"type": "string",
+				"defaultValue": "RM_ADW"
+			},
+			"owner": {
+				"type": "string",
+				"defaultValue": "microsoft"
+			},
+			"repo": {
+				"type": "string",
+				"defaultValue": "sql-server-samples"
+			},
+			"branch": {
+				"type": "string",
+				"defaultValue": "master"
+			}
+		},
+		"annotations": []
+	}
+}
