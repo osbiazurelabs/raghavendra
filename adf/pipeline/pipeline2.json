@@ -158,7 +158,11 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"folderPath": {
-											"value": "@concat('raw/', pipeline().globalParameters.source_system, '/', formatDateTime(utcNow(),'yyyy/MM/dd'))\n",
+											"value": "@concat('raw/', pipeline().parameters.source_system, '/', formatDateTime(utcNow(),'yyyy/MM/dd'))\n",
+											"type": "Expression"
+										},
+										"fileName": {
+											"value": "@concat(pipeline().parameters.project, '_', item().name)\n",
 											"type": "Expression"
 										}
 									}
@@ -169,6 +173,14 @@
 				}
 			}
 		],
+		"parameters": {
+			"source_system": {
+				"type": "string"
+			},
+			"project": {
+				"type": "string"
+			}
+		},
 		"annotations": []
 	}
 }
