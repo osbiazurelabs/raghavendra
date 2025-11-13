@@ -11,6 +11,12 @@
 			},
 			"fileName": {
 				"type": "string"
+			},
+			"delimiter": {
+				"type": "string"
+			},
+			"hasHeader": {
+				"type": "string"
 			}
 		},
 		"annotations": [],

@@ -100,7 +100,9 @@
 									"type": "DelimitedTextSource",
 									"storeSettings": {
 										"type": "HttpReadSettings",
-										"requestMethod": "GET"
+										"maxConcurrentConnections": 1,
+										"requestMethod": "GET",
+										"requestTimeout": ""
 									},
 									"formatSettings": {
 										"type": "DelimitedTextReadSettings"
@@ -145,7 +147,7 @@
 											"type": "Expression"
 										},
 										"path": {
-											"value": "@item().item",
+											"value": "@item().path",
 											"type": "Expression"
 										},
 										"fileName": "''"
@@ -164,6 +166,14 @@
 										"fileName": {
 											"value": "@concat(pipeline().parameters.project, '_', item().name)\n",
 											"type": "Expression"
+										},
+										"delimiter": {
+											"value": "','\n",
+											"type": "Expression"
+										},
+										"hasHeader": {
+											"value": "false\n",
+											"type": "Expression"
 										}
 									}
 								}
@@ -175,10 +185,24 @@
 		],
 		"parameters": {
 			"source_system": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "RM_ADW"
 			},
 			"project": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "RM_ADW"
+			},
+			"owner": {
+				"type": "string",
+				"defaultValue": "microsoft"
+			},
+			"repo": {
+				"type": "string",
+				"defaultValue": "sql-server-samples"
+			},
+			"branch": {
+				"type": "string",
+				"defaultValue": "master"
 			}
 		},
 		"annotations": []
