@@ -27,7 +27,11 @@
 		"type": "Json",
 		"typeProperties": {
 			"location": {
-				"type": "HttpServerLocation"
+				"type": "HttpServerLocation",
+				"relativeUrl": {
+					"value": "@concat('/repos/', dataset().owner, '/', dataset().repo, '/contents/', dataset().path)",
+					"type": "Expression"
+				}
 			}
 		},
 		"schema": {}
