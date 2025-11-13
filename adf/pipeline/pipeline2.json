@@ -135,15 +135,15 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"owner": {
-											"value": "@item().owner",
+											"value": "@pipeline().parameters.owner",
 											"type": "Expression"
 										},
 										"repo": {
-											"value": "@item().repo",
+											"value": "@pipeline().parameters.repo",
 											"type": "Expression"
 										},
 										"branch": {
-											"value": "@item().branch",
+											"value": "@pipeline().parameters.branch",
 											"type": "Expression"
 										},
 										"path": {
