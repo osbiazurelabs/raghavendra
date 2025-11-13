@@ -207,6 +207,8 @@
 						{
 							"name": "WriteAuditFile",
 							"type": "WebActivity",
+							"state": "Inactive",
+							"onInactiveMarkAs": "Succeeded",
 							"dependsOn": [
 								{
 									"activity": "SetAuditRecord",
@@ -235,18 +237,15 @@
 								},
 								"body": "@variables('auditRecord')\n",
 								"authentication": {
-									"type": "ServicePrincipal",
-									"userTenant": "0223fd63-dec0-4282-accb-460fb4f20168",
-									"username": "eea2a8eb-4e7f-4df1-8e62-0cc647dbd853",
-									"resource": "rg-rm-adw-med-dev",
+									"type": "Basic",
+									"username": "alc1762422883_1762422887449@npalchemy.onmicrosoft.com",
 									"password": {
 										"type": "AzureKeyVaultSecret",
 										"store": {
 											"referenceName": "AzureKeyVault1",
 											"type": "LinkedServiceReference"
 										},
-										"secretName": "sp-rm-adw-secret",
-										"secretVersion": "68d10830aa434da69441d56da2c796cb"
+										"secretName": "sp-rm-adw-secret"
 									}
 								}
 							}
