@@ -5,6 +5,24 @@
 			"referenceName": "LS_GitHub_http",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"owner": {
+				"type": "string",
+				"defaultValue": "microsoft"
+			},
+			"repo": {
+				"type": "string",
+				"defaultValue": "sql-server-samples"
+			},
+			"path": {
+				"type": "string",
+				"defaultValue": "samples/databases/adventure-works/oltp-install-script"
+			},
+			"branch": {
+				"type": "string",
+				"defaultValue": "master"
+			}
+		},
 		"annotations": [],
 		"type": "Json",
 		"typeProperties": {
