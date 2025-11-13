@@ -1,0 +1,22 @@
+{
+	"name": "DS_GitHub_ListFiles_http",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_GitHub_http",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "HttpServerLocation",
+				"relativeUrl": "sql-server-samples/tree/master/samples/databases/adventure-works/oltp-install-script"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
