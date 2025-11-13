@@ -111,7 +111,8 @@
 								"sink": {
 									"type": "DelimitedTextSink",
 									"storeSettings": {
-										"type": "AzureBlobFSWriteSettings"
+										"type": "AzureBlobFSWriteSettings",
+										"maxConcurrentConnections": 4
 									},
 									"formatSettings": {
 										"type": "DelimitedTextWriteSettings",
@@ -164,7 +165,7 @@
 											"type": "Expression"
 										},
 										"fileName": {
-											"value": "@concat(pipeline().parameters.project, '_', item().name)\n",
+											"value": "@item().name",
 											"type": "Expression"
 										},
 										"delimiter": {
