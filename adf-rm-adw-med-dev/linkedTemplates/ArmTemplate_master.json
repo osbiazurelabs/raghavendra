@@ -1,0 +1,98 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adf-rm-adw-med-dev"
+		},
+		"ls_git_raw_http_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'ls_git_raw_http'"
+		},
+		"AzureKeyVault1_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://osbkeyvault.vault.azure.net/"
+		},
+		"LS_ADLS_RM_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://adlsrmadwdev.dfs.core.windows.net/"
+		},
+		"LS_GitHub_http_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://api.github.com"
+		},
+		"ls_git_raw_http_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://raw.githubusercontent.com"
+		},
+		"ls_git_raw_http_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "sqladminuser"
+		},
+		"adlsrmadwdev_privat_end_properties_privateLinkResourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/f2dcf14e-c010-4080-bb14-de61bf467b98/resourceGroups/rg-rm-adw-med-dev/providers/Microsoft.Storage/storageAccounts/adlsrmadwdev"
+		},
+		"adlsrmadwdev_privat_end_properties_groupId": {
+			"type": "string",
+			"defaultValue": "dfs"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "adf-rm-adw-med-dev_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"ls_git_raw_http_password": {
+						"value": "[parameters('ls_git_raw_http_password')]"
+					},
+					"AzureKeyVault1_properties_typeProperties_baseUrl": {
+						"value": "[parameters('AzureKeyVault1_properties_typeProperties_baseUrl')]"
+					},
+					"adlsrmadwdev_privat_end_properties_privateLinkResourceId": {
+						"value": "[parameters('adlsrmadwdev_privat_end_properties_privateLinkResourceId')]"
+					},
+					"adlsrmadwdev_privat_end_properties_groupId": {
+						"value": "[parameters('adlsrmadwdev_privat_end_properties_groupId')]"
+					},
+					"LS_ADLS_RM_properties_typeProperties_url": {
+						"value": "[parameters('LS_ADLS_RM_properties_typeProperties_url')]"
+					},
+					"LS_GitHub_http_properties_typeProperties_url": {
+						"value": "[parameters('LS_GitHub_http_properties_typeProperties_url')]"
+					},
+					"ls_git_raw_http_properties_typeProperties_url": {
+						"value": "[parameters('ls_git_raw_http_properties_typeProperties_url')]"
+					},
+					"ls_git_raw_http_properties_typeProperties_userName": {
+						"value": "[parameters('ls_git_raw_http_properties_typeProperties_userName')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

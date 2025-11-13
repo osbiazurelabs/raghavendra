@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adf-rm-adw-med-dev"
+		},
+		"ls_git_raw_http_password": {
+			"value": ""
+		},
+		"AzureKeyVault1_properties_typeProperties_baseUrl": {
+			"value": "https://osbkeyvault.vault.azure.net/"
+		},
+		"LS_ADLS_RM_properties_typeProperties_url": {
+			"value": "https://adlsrmadwdev.dfs.core.windows.net/"
+		},
+		"LS_GitHub_http_properties_typeProperties_url": {
+			"value": "https://api.github.com"
+		},
+		"ls_git_raw_http_properties_typeProperties_url": {
+			"value": "https://raw.githubusercontent.com"
+		},
+		"ls_git_raw_http_properties_typeProperties_userName": {
+			"value": "sqladminuser"
+		},
+		"adlsrmadwdev_privat_end_properties_privateLinkResourceId": {
+			"value": "/subscriptions/f2dcf14e-c010-4080-bb14-de61bf467b98/resourceGroups/rg-rm-adw-med-dev/providers/Microsoft.Storage/storageAccounts/adlsrmadwdev"
+		},
+		"adlsrmadwdev_privat_end_properties_groupId": {
+			"value": "dfs"
+		}
+	}
+}

@@ -1,0 +1,1301 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adf-rm-adw-med-dev"
+		},
+		"ls_git_raw_http_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'ls_git_raw_http'"
+		},
+		"AzureKeyVault1_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://osbkeyvault.vault.azure.net/"
+		},
+		"LS_ADLS_RM_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://adlsrmadwdev.dfs.core.windows.net/"
+		},
+		"LS_GitHub_http_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://api.github.com"
+		},
+		"ls_git_raw_http_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://raw.githubusercontent.com"
+		},
+		"ls_git_raw_http_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "sqladminuser"
+		},
+		"adlsrmadwdev_privat_end_properties_privateLinkResourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/f2dcf14e-c010-4080-bb14-de61bf467b98/resourceGroups/rg-rm-adw-med-dev/providers/Microsoft.Storage/storageAccounts/adlsrmadwdev"
+		},
+		"adlsrmadwdev_privat_end_properties_groupId": {
+			"type": "string",
+			"defaultValue": "dfs"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_GetGitHubCsvs_To_SQL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET",
+								"paginationRules": {
+									"supportRFC5988": "true"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"sqlWriterStoredProcedureName": "[[dbo].[sp_upsert_dev_csv_scr_config]",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false
+						}
+					},
+					{
+						"name": "GetFiles",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "HttpReadSettings",
+									"requestMethod": "GET"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_GitHub_ListFiles_http",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "OnlyCSVs",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "GetFiles",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetFiles').output.value",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@endsWith(item().name, '.csv')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "ProcessEachCSV",
+						"type": "ForEach",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [
+							{
+								"activity": "OnlyCSVs",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('OnlyCSVs').output.Value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "sp_upsert_dev_csv_scr_config",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[dbo].[sp_upsert_dev_csv_scr_config]",
+										"storedProcedureParameters": {
+											"CSV_File_Name": {
+												"value": {
+													"value": "@item().name",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"Raw_GitHub_URL": {
+												"value": {
+													"value": "@item().download_url",
+													"type": "Expression"
+												},
+												"type": "String"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"owner": {
+						"type": "string",
+						"defaultValue": "microsoft"
+					},
+					"repo": {
+						"type": "string",
+						"defaultValue": "sql-server-samples"
+					},
+					"path": {
+						"type": "string",
+						"defaultValue": "samples/databases/adventure-works/oltp-install-script"
+					},
+					"branch": {
+						"type": "string",
+						"defaultValue": "master"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_GitHub_ListFiles_http')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetFiles",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "HttpReadSettings",
+									"requestMethod": "GET"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_GitHub_ListFiles_http",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "OnlyCSVs",
+						"type": "Filter",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [
+							{
+								"activity": "GetFiles",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetFiles').output.value",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@endsWith(item().name, '.csv')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "ProcessEachCSV",
+						"type": "ForEach",
+						"state": "Inactive",
+						"onInactiveMarkAs": "Succeeded",
+						"dependsOn": [
+							{
+								"activity": "OnlyCSVs",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('OnlyCSVs').output.Value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "CopyFileToADLS",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 1,
+										"retryIntervalInSeconds": 30
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobFSReadSettings",
+												"recursive": true,
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											},
+											"requestMethod": "GET"
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings",
+												"copyBehavior": "PreserveHierarchy"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".csv"
+											}
+										},
+										"enableStaging": false
+									}
+								},
+								{
+									"name": "GetFileMetadata",
+									"type": "GetMetadata",
+									"dependsOn": [
+										{
+											"activity": "CopyFileToADLS",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"fieldList": [
+											"size",
+											"lastModified"
+										],
+										"storeSettings": {
+											"type": "AzureBlobFSReadSettings",
+											"recursive": true,
+											"enablePartitionDiscovery": false
+										}
+									}
+								},
+								{
+									"name": "sp_upsert_dev_csv_scr_config",
+									"type": "SqlServerStoredProcedure",
+									"dependsOn": [
+										{
+											"activity": "GetFileMetadata",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"retry": 0,
+										"retryIntervalInSeconds": 30
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"storedProcedureName": "[[dbo].[sp_upsert_dev_csv_scr_config]",
+										"storedProcedureParameters": {
+											"CSV_File_Name": {
+												"value": {
+													"value": "@item().name",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"Raw_GitHub_URL": {
+												"value": {
+													"value": "@item().download_url",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"ADLS_Path": {
+												"value": {
+													"value": "@concat('abfss://', pipeline().parameters.adlsContainer, '@', pipeline().parameters.storageAccount, '/', pipeline().parameters.rawBasePath, '/', pipeline().parameters.owner, '/', pipeline().parameters.repo, '/', formatDateTime(utcNow(),'yyyy/MM/dd'), '/', item().name)",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"FileSizeBytes": {
+												"value": {
+													"value": "@activity('GetFileMetadata').output.size",
+													"type": "Expression"
+												},
+												"type": "Int"
+											},
+											"LastModifiedUTC": {
+												"value": {
+													"value": "@activity('GetFileMetadata').output.lastModified",
+													"type": "Expression"
+												},
+												"type": "String"
+											},
+											"IngestedOnUTC": {
+												"value": {
+													"value": "@utcNow()",
+													"type": "Expression"
+												},
+												"type": "String"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"owner": {
+						"type": "string",
+						"defaultValue": "microsoft"
+					},
+					"repo": {
+						"type": "string",
+						"defaultValue": "sql-server-samples"
+					},
+					"path": {
+						"type": "string",
+						"defaultValue": "samples/databases/adventure-works/oltp-install-script"
+					},
+					"branch": {
+						"type": "string",
+						"defaultValue": "master"
+					},
+					"adlsContainer": {
+						"type": "string",
+						"defaultValue": "project"
+					},
+					"storageAccount": {
+						"type": "string",
+						"defaultValue": "https://adlsrmadwdev.blob.core.windows.net"
+					},
+					"rawBasePath": {
+						"type": "string",
+						"defaultValue": "raw"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_GitHub_ListFiles_http')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline2')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetRepoFileList",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "HttpReadSettings",
+									"requestMethod": "GET"
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "ds_github_list",
+								"type": "DatasetReference",
+								"parameters": {
+									"owner": {
+										"value": "microsoft",
+										"type": "Expression"
+									},
+									"repo": "sql-server-samples",
+									"path": "samples/databases/adventure-works/oltp-install-script"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "OnlyCSVs",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "GetRepoFileList",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetRepoFileList').output.value",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@endsWith(item().name, '.csv')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "ProcessEachCSV",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "OnlyCSVs",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('OnlyCSVs').output.Value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 4,
+							"activities": [
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "HttpReadSettings",
+												"maxConcurrentConnections": 5,
+												"requestMethod": "GET",
+												"requestTimeout": ""
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings",
+												"maxConcurrentConnections": 4
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "ds_github_raw_file",
+											"type": "DatasetReference",
+											"parameters": {
+												"owner": {
+													"value": "@pipeline().parameters.owner",
+													"type": "Expression"
+												},
+												"repo": {
+													"value": "@pipeline().parameters.repo",
+													"type": "Expression"
+												},
+												"branch": {
+													"value": "@pipeline().parameters.branch",
+													"type": "Expression"
+												},
+												"path": {
+													"value": "@item().path",
+													"type": "Expression"
+												},
+												"fileName": "''"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_adls_raw_csv",
+											"type": "DatasetReference",
+											"parameters": {
+												"folderPath": {
+													"value": "@concat('raw/', pipeline().parameters.source_system, '/', formatDateTime(utcNow(),'yyyy/MM/dd'))\n",
+													"type": "Expression"
+												},
+												"fileName": {
+													"value": "@item().name",
+													"type": "Expression"
+												},
+												"delimiter": {
+													"value": "','\n",
+													"type": "Expression"
+												},
+												"hasHeader": {
+													"value": "false\n",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"source_system": {
+						"type": "string",
+						"defaultValue": "RM_ADW"
+					},
+					"project": {
+						"type": "string",
+						"defaultValue": "RM_ADW"
+					},
+					"owner": {
+						"type": "string",
+						"defaultValue": "microsoft"
+					},
+					"repo": {
+						"type": "string",
+						"defaultValue": "sql-server-samples"
+					},
+					"branch": {
+						"type": "string",
+						"defaultValue": "master"
+					}
+				},
+				"variables": {
+					"auditRecord": {
+						"type": "String",
+						"defaultValue": "@concat(   '{',     '\"CSV_File_Name\":\"', item().name, '\",',     '\"Raw_GitHub_URL\":\"', item().download_url, '\",',     '\"Target_Path\":\"', concat('project/raw/', pipeline().parameters.source_system, '/', formatDateTime(utcNow(),'yyyy/MM/dd'), '/', item().name), '\",',     '\"Has_Header\":false,',     '\"Delimiter\":\",\",',     '\"Load_Status\":\"', if( greater( activity('CopyFileToRaw').output.rowsCopied, 0 ), 'SUCCESS', 'FAILED' ), '\",',     '\"Load_Timestamp\":\"', formatDateTime(utcNow(),'yyyy-MM-ddTHH:mm:ssZ'), '\",',     '\"Comments\":\"', if(contains(string(activity('CopyFileToRaw').output), 'error'), replace(string(activity('CopyFileToRaw').output.error.message), '\"', '\\''), '' ), '\"',   '}' )"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_github_list')]",
+				"[concat(variables('factoryId'), '/datasets/ds_github_raw_file')]",
+				"[concat(variables('factoryId'), '/datasets/ds_adls_raw_csv')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/pipeline2_copy1')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "GetRepoFileList",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "HttpReadSettings",
+									"requestMethod": "GET"
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "ds_github_list",
+								"type": "DatasetReference",
+								"parameters": {
+									"owner": {
+										"value": "microsoft",
+										"type": "Expression"
+									},
+									"repo": "sql-server-samples",
+									"path": "samples/databases/adventure-works/oltp-install-script",
+									"branch": "master"
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "OnlyCSVs",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "GetRepoFileList",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('GetRepoFileList').output.value",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@endsWith(item().name, '.csv')",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "ProcessEachCSV",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "OnlyCSVs",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('OnlyCSVs').output.Value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 1,
+							"activities": [
+								{
+									"name": "CopyFileToRaw",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "HttpReadSettings",
+												"maxConcurrentConnections": 5,
+												"requestMethod": "GET",
+												"requestTimeout": ""
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "ds_github_raw_file",
+											"type": "DatasetReference",
+											"parameters": {
+												"owner": {
+													"value": "@pipeline().parameters.owner",
+													"type": "Expression"
+												},
+												"repo": {
+													"value": "@pipeline().parameters.repo",
+													"type": "Expression"
+												},
+												"branch": {
+													"value": "@pipeline().parameters.branch",
+													"type": "Expression"
+												},
+												"path": {
+													"value": "@item().path",
+													"type": "Expression"
+												},
+												"fileName": "''"
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "ds_adls_raw_csv",
+											"type": "DatasetReference",
+											"parameters": {
+												"folderPath": {
+													"value": "@concat('raw/', pipeline().parameters.source_system, '/', formatDateTime(utcNow(),'yyyy/MM/dd'))\n",
+													"type": "Expression"
+												},
+												"fileName": {
+													"value": "@concat(pipeline().parameters.project, '_', item().name)\n",
+													"type": "Expression"
+												},
+												"delimiter": {
+													"value": "','\n",
+													"type": "Expression"
+												},
+												"hasHeader": {
+													"value": "false\n",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								},
+								{
+									"name": "SetAuditRecord",
+									"type": "SetVariable",
+									"dependsOn": [
+										{
+											"activity": "CopyFileToRaw",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "auditRecord",
+										"value": {
+											"value": "@concat(\n  '{',\n    '\"CSV_File_Name\":\"', item().name, '\",',\n    '\"Raw_GitHub_URL\":\"', item().download_url, '\",',\n    '\"Target_Path\":\"', concat('project/raw/', pipeline().parameters.source_system, '/', formatDateTime(utcNow(),'yyyy/MM/dd'), '/', item().name), '\",',\n    '\"Load_Status\":\"', if(greater(int(coalesce(string(activity('CopyFileToRaw').output.filesWritten),'0')), 0), 'SUCCESS', 'FAILED'), '\",',\n    '\"Load_Timestamp\":\"', formatDateTime(utcNow(),'yyyy-MM-ddTHH:mm:ssZ'), '\"',\n  '}'\n)\n",
+											"type": "Expression"
+										}
+									}
+								},
+								{
+									"name": "WriteAuditFile",
+									"type": "WebActivity",
+									"state": "Inactive",
+									"onInactiveMarkAs": "Succeeded",
+									"dependsOn": [
+										{
+											"activity": "SetAuditRecord",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"method": "PUT",
+										"headers": {},
+										"url": {
+											"value": "@concat(\n  'https://adlsrmadwdev.blob.core.windows.net/project/audit/',\n  pipeline().parameters.source_system, '/',\n  formatDateTime(utcNow(),'yyyy/MM/dd'), '/',\n  'audit_', replace(item().name,'.csv',''), '.json'\n)\n",
+											"type": "Expression"
+										},
+										"connectVia": {
+											"referenceName": "AutoResolveIntegrationRuntime",
+											"type": "IntegrationRuntimeReference"
+										},
+										"body": {
+											"value": "@variables('auditRecord')\n",
+											"type": "Expression"
+										},
+										"authentication": {
+											"type": "Basic",
+											"username": "alc1762422883_1762422887449@npalchemy.onmicrosoft.com",
+											"password": {
+												"type": "AzureKeyVaultSecret",
+												"store": {
+													"referenceName": "AzureKeyVault1",
+													"type": "LinkedServiceReference"
+												},
+												"secretName": "sp-rm-adw-secret"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"source_system": {
+						"type": "string",
+						"defaultValue": "RM_ADW"
+					},
+					"project": {
+						"type": "string",
+						"defaultValue": "RM_ADW"
+					},
+					"owner": {
+						"type": "string",
+						"defaultValue": "microsoft"
+					},
+					"repo": {
+						"type": "string",
+						"defaultValue": "sql-server-samples"
+					},
+					"branch": {
+						"type": "string",
+						"defaultValue": "master"
+					}
+				},
+				"variables": {
+					"auditRecord": {
+						"type": "String"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_github_list')]",
+				"[concat(variables('factoryId'), '/datasets/ds_github_raw_file')]",
+				"[concat(variables('factoryId'), '/datasets/ds_adls_raw_csv')]",
+				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
+				"[concat(variables('factoryId'), '/linkedServices/AzureKeyVault1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_GitHub_ListFiles_http')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_GitHub_http",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "HttpServerLocation",
+						"relativeUrl": {
+							"value": "@concat('/repos/', pipeline().parameters.owner, '/', pipeline().parameters.repo, '/contents/', pipeline().parameters.path, '?ref=', pipeline().parameters.branch)",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_GitHub_http')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_adls_raw_csv')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_RM",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"folderPath": {
+						"type": "string"
+					},
+					"fileName": {
+						"type": "string"
+					},
+					"delimiter": {
+						"type": "string"
+					},
+					"hasHeader": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().fileName",
+							"type": "Expression"
+						},
+						"folderPath": "raw",
+						"fileSystem": "project"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_RM')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_github_list')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_GitHub_http",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"owner": {
+						"type": "string",
+						"defaultValue": "microsoft"
+					},
+					"repo": {
+						"type": "string",
+						"defaultValue": "sql-server-samples"
+					},
+					"path": {
+						"type": "string",
+						"defaultValue": "samples/databases/adventure-works/oltp-install-script"
+					},
+					"branch": {
+						"type": "string",
+						"defaultValue": "master"
+					}
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "HttpServerLocation",
+						"relativeUrl": {
+							"value": "@concat('/repos/', dataset().owner, '/', dataset().repo, '/contents/', dataset().path)",
+							"type": "Expression"
+						}
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_GitHub_http')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_github_raw_file')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_git_raw_http",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"owner": {
+						"type": "string",
+						"defaultValue": "microsoft"
+					},
+					"repo": {
+						"type": "string",
+						"defaultValue": "sql-server-samples"
+					},
+					"branch": {
+						"type": "string",
+						"defaultValue": "master"
+					},
+					"path": {
+						"type": "string",
+						"defaultValue": "samples/databases/adventure-works/oltp-install-script"
+					},
+					"fileName": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "HttpServerLocation",
+						"relativeUrl": {
+							"value": "@concat(\n  '/', \n  dataset().owner, '/', \n  dataset().repo, '/', \n  dataset().branch, '/', \n  dataset().path\n)\n",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/ls_git_raw_http')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureKeyVault1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('AzureKeyVault1_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_ADLS_RM')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('LS_ADLS_RM_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LS_GitHub_http')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "HttpServer",
+				"typeProperties": {
+					"url": "[parameters('LS_GitHub_http_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_git_raw_http')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "HttpServer",
+				"typeProperties": {
+					"url": "[parameters('ls_git_raw_http_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Basic",
+					"userName": "[parameters('ls_git_raw_http_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('ls_git_raw_http_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				},
+				"managedVirtualNetwork": {
+					"type": "ManagedVirtualNetworkReference",
+					"referenceName": "default"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/managedVirtualNetworks/default')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/default')]",
+			"type": "Microsoft.DataFactory/factories/managedVirtualNetworks",
+			"apiVersion": "2018-06-01",
+			"properties": {},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/default/adlsrmadwdev_privat_end')]",
+			"type": "Microsoft.DataFactory/factories/managedVirtualNetworks/managedPrivateEndpoints",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"privateLinkResourceId": "[parameters('adlsrmadwdev_privat_end_properties_privateLinkResourceId')]",
+				"groupId": "[parameters('adlsrmadwdev_privat_end_properties_groupId')]"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/managedVirtualNetworks/default')]"
+			]
+		}
+	]
+}
