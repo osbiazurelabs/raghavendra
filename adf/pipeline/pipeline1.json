@@ -227,11 +227,11 @@
 			},
 			"adlsContainer": {
 				"type": "string",
-				"defaultValue": "<container>"
+				"defaultValue": "project"
 			},
 			"storageAccount": {
 				"type": "string",
-				"defaultValue": "<account>.dfs.core.windows.net"
+				"defaultValue": "adlsrmadwdev.dfs.core.windows.net"
 			},
 			"rawBasePath": {
 				"type": "string",
