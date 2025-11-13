@@ -13,77 +13,21 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "HttpReadSettings",
+							"requestMethod": "GET"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
 					"dataset": {
 						"referenceName": "DS_GitHub_ListFiles_http",
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
-				}
-			},
-			{
-				"name": "OnlyCSVs",
-				"type": "Filter",
-				"dependsOn": [
-					{
-						"activity": "GetFiles",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"items": {
-						"value": "@activity('GetFiles').output.value",
-						"type": "Expression"
-					},
-					"condition": {
-						"value": "@endsWith(item().name, '.csv')",
-						"type": "Expression"
-					}
-				}
-			},
-			{
-				"name": "ForEach_DownloadCSVs",
-				"type": "ForEach",
-				"dependsOn": [
-					{
-						"activity": "OnlyCSVs",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"items": {
-						"value": "@activity('OnlyCSVs').output.value",
-						"type": "Expression"
-					},
-					"isSequential": false,
-					"activities": [
-						{
-							"name": "CopyToADLS",
-							"type": "Copy",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "1.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"source": {
-									"type": "HttpSource",
-									"httpRequestTimeout": "00:01:00"
-								},
-								"sink": {
-									"type": "BlobSink"
-								},
-								"enableStaging": false
-							}
-						}
-					]
 				}
 			}
 		],
