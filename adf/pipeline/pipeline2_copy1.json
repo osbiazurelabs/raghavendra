@@ -235,16 +235,8 @@
 								},
 								"body": "@variables('auditRecord')\n",
 								"authentication": {
-									"type": "Basic",
-									"username": "osbkeyvault",
-									"password": {
-										"type": "AzureKeyVaultSecret",
-										"store": {
-											"referenceName": "AzureKeyVault1",
-											"type": "LinkedServiceReference"
-										},
-										"secretName": "sp-rm-adw-secret"
-									}
+									"type": "MSI",
+									"resource": "rg-rm-adw-med-dev"
 								}
 							}
 						}
