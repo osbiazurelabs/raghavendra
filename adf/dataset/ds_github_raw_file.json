@@ -32,7 +32,7 @@
 			"location": {
 				"type": "HttpServerLocation",
 				"relativeUrl": {
-					"value": "@concat(\n    '/', \n    pipeline().parameters.owner, '/', \n    pipeline().parameters.repo, '/', \n    pipeline().parameters.branch, '/', \n    dataset().path\n)",
+					"value": "@concat(\n  '/', \n  dataset().owner, '/', \n  dataset().repo, '/', \n  dataset().branch, '/', \n  dataset().path\n)\n",
 					"type": "Expression"
 				}
 			},
