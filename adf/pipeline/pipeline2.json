@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Lookup1",
+				"name": "GetRepoFileList",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -37,7 +37,87 @@
 							"path": "samples/databases/adventure-works/oltp-install-script"
 						}
 					},
-					"firstRowOnly": true
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "OnlyCSVs",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "GetRepoFileList",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GetRepoFileList').output.value",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@endsWith(item().name, '.csv')",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "ProcessEachCSV",
+				"type": "ForEach",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
+				"dependsOn": [
+					{
+						"activity": "OnlyCSVs",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('OnlyCSVs').output.Value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"batchCount": 4,
+					"activities": [
+						{
+							"name": "Copy data1",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "HttpReadSettings",
+										"requestMethod": "GET"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "ds_github_raw_file",
+									"type": "DatasetReference"
+								}
+							]
+						}
+					]
 				}
 			}
 		],
