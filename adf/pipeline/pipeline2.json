@@ -27,8 +27,17 @@
 					},
 					"dataset": {
 						"referenceName": "ds_github_list",
-						"type": "DatasetReference"
-					}
+						"type": "DatasetReference",
+						"parameters": {
+							"owner": {
+								"value": "microsoft",
+								"type": "Expression"
+							},
+							"repo": "sql-server-samples",
+							"path": "samples/databases/adventure-works/oltp-install-script"
+						}
+					},
+					"firstRowOnly": true
 				}
 			}
 		],
