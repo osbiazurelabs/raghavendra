@@ -206,6 +206,12 @@
 				"defaultValue": "master"
 			}
 		},
+		"variables": {
+			"auditRecord": {
+				"type": "String",
+				"defaultValue": "@concat(   '{',     '\"CSV_File_Name\":\"', item().name, '\",',     '\"Raw_GitHub_URL\":\"', item().download_url, '\",',     '\"Target_Path\":\"', concat('project/raw/', pipeline().parameters.source_system, '/', formatDateTime(utcNow(),'yyyy/MM/dd'), '/', item().name), '\",',     '\"Has_Header\":false,',     '\"Delimiter\":\",\",',     '\"Load_Status\":\"', if( greater( activity('CopyFileToRaw').output.rowsCopied, 0 ), 'SUCCESS', 'FAILED' ), '\",',     '\"Load_Timestamp\":\"', formatDateTime(utcNow(),'yyyy-MM-ddTHH:mm:ssZ'), '\",',     '\"Comments\":\"', if(contains(string(activity('CopyFileToRaw').output), 'error'), replace(string(activity('CopyFileToRaw').output.error.message), '\"', '\\''), '' ), '\"',   '}' )"
+			}
+		},
 		"annotations": []
 	}
 }

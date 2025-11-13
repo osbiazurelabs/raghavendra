@@ -178,6 +178,37 @@
 									}
 								}
 							]
+						},
+						{
+							"name": "Web1",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "Copy data1",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "PUT",
+								"url": {
+									"value": "@concat(\n  'https://adlsrmadwdev.dfs.core.windows.net/project/audit/',\n  pipeline().parameters.source_system, '/',\n  formatDateTime(utcNow(), 'yyyy/MM/dd'), '/',\n  variables('auditFileName'),\n  '?action=append&position=0'\n)\n",
+									"type": "Expression"
+								},
+								"connectVia": {
+									"referenceName": "AutoResolveIntegrationRuntime",
+									"type": "IntegrationRuntimeReference"
+								}
+							}
 						}
 					]
 				}
@@ -203,6 +234,12 @@
 			"branch": {
 				"type": "string",
 				"defaultValue": "master"
+			}
+		},
+		"variables": {
+			"auditFileName": {
+				"type": "String",
+				"defaultValue": "@concat('audit_', formatDateTime(utcNow(),'yyyyMMdd'), '.jsonl')"
 			}
 		},
 		"annotations": []
