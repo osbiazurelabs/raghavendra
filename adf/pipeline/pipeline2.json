@@ -66,8 +66,6 @@
 			{
 				"name": "ProcessEachCSV",
 				"type": "ForEach",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "OnlyCSVs",
@@ -108,12 +106,62 @@
 										"type": "DelimitedTextReadSettings"
 									}
 								},
-								"enableStaging": false
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
 							},
 							"inputs": [
 								{
 									"referenceName": "ds_github_raw_file",
-									"type": "DatasetReference"
+									"type": "DatasetReference",
+									"parameters": {
+										"owner": {
+											"value": "@item().owner",
+											"type": "Expression"
+										},
+										"repo": {
+											"value": "@item().repo",
+											"type": "Expression"
+										},
+										"branch": {
+											"value": "@item().branch",
+											"type": "Expression"
+										},
+										"path": {
+											"value": "@item().item",
+											"type": "Expression"
+										},
+										"fileName": "''"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ds_adls_raw_csv",
+									"type": "DatasetReference",
+									"parameters": {
+										"folderPath": {
+											"value": "@concat(\n    'raw/',\n    pipeline().parameters.source_system,\n    '/',\n    formatDateTime(utcNow(),'yyyy/MM/dd')\n)\n",
+											"type": "Expression"
+										}
+									}
 								}
 							]
 						}
