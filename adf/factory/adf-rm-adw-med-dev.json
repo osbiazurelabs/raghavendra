@@ -6,6 +6,9 @@
 				"type": "string",
 				"value": "RM_ADW"
 			}
+		},
+		"globalConfigurations": {
+			"PipelineBillingEnabled": "false"
 		}
 	},
 	"location": "eastus",
