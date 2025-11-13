@@ -34,7 +34,8 @@
 								"type": "Expression"
 							},
 							"repo": "sql-server-samples",
-							"path": "samples/databases/adventure-works/oltp-install-script"
+							"path": "samples/databases/adventure-works/oltp-install-script",
+							"branch": "master"
 						}
 					},
 					"firstRowOnly": false
@@ -84,7 +85,7 @@
 					"batchCount": 4,
 					"activities": [
 						{
-							"name": "Copy data1",
+							"name": "CopyFileToRaw",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -180,11 +181,35 @@
 							]
 						},
 						{
-							"name": "Web1",
+							"name": "SetAuditRecord",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "CopyFileToRaw",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "auditRecord",
+								"value": {
+									"value": "@concat(\n  '{',\n    '\"CSV_File_Name\":\"', item().name, '\",',\n    '\"Raw_GitHub_URL\":\"', item().download_url, '\",',\n    '\"Target_Path\":\"', concat('project/raw/', pipeline().parameters.source_system, '/', formatDateTime(utcNow(),'yyyy/MM/dd'), '/', item().name), '\",',\n    '\"Load_Status\":\"', if(greater(int(coalesce(string(activity('CopyFileToRaw').output.filesWritten),'0')), 0), 'SUCCESS', 'FAILED'), '\",',\n    '\"Load_Timestamp\":\"', formatDateTime(utcNow(),'yyyy-MM-ddTHH:mm:ssZ'), '\"',\n  '}'\n)\n",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "WriteAuditFile",
 							"type": "WebActivity",
 							"dependsOn": [
 								{
-									"activity": "Copy data1",
+									"activity": "SetAuditRecord",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -201,13 +226,14 @@
 							"typeProperties": {
 								"method": "PUT",
 								"url": {
-									"value": "@concat(\n  'https://adlsrmadwdev.dfs.core.windows.net/project/audit/',\n  pipeline().parameters.source_system, '/',\n  formatDateTime(utcNow(), 'yyyy/MM/dd'), '/',\n  variables('auditFileName'),\n  '?action=append&position=0'\n)\n",
+									"value": "@concat(\n  'https://adlsrmadwdev.blob.core.windows.net/project/audit/',\n  pipeline().parameters.source_system, '/',\n  formatDateTime(utcNow(),'yyyy/MM/dd'), '/',\n  'audit_', replace(item().name,'.csv',''), '.json'\n)\n",
 									"type": "Expression"
 								},
 								"connectVia": {
 									"referenceName": "AutoResolveIntegrationRuntime",
 									"type": "IntegrationRuntimeReference"
-								}
+								},
+								"body": "@variables('auditRecord')\n"
 							}
 						}
 					]
@@ -237,9 +263,8 @@
 			}
 		},
 		"variables": {
-			"auditFileName": {
-				"type": "String",
-				"defaultValue": "@concat('audit_', formatDateTime(utcNow(),'yyyyMMdd'), '.jsonl')"
+			"auditRecord": {
+				"type": "String"
 			}
 		},
 		"annotations": []
