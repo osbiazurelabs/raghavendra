@@ -1,0 +1,7 @@
+{
+	"name": "adlsrmadwdev_privat_end",
+	"properties": {
+		"privateLinkResourceId": "/subscriptions/f2dcf14e-c010-4080-bb14-de61bf467b98/resourceGroups/rg-rm-adw-med-dev/providers/Microsoft.Storage/storageAccounts/adlsrmadwdev",
+		"groupId": "dfs"
+	}
+}
