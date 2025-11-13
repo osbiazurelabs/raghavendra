@@ -233,7 +233,7 @@
 			},
 			"storageAccount": {
 				"type": "string",
-				"defaultValue": "adlsrmadwdev.dfs.core.windows.net"
+				"defaultValue": "https://adlsrmadwdev.blob.core.windows.net"
 			},
 			"rawBasePath": {
 				"type": "string",

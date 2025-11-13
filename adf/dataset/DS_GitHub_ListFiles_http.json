@@ -15,7 +15,8 @@
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
-				"type": "HttpServerLocation"
+				"type": "HttpServerLocation",
+				"relativeUrl": "sql-server-samples/tree/master/samples/databases/adventure-works/oltp-install-script"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
