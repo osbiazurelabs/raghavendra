@@ -82,7 +82,7 @@
 						"type": "Expression"
 					},
 					"isSequential": false,
-					"batchCount": 4,
+					"batchCount": 1,
 					"activities": [
 						{
 							"name": "CopyFileToRaw",
@@ -233,7 +233,19 @@
 									"referenceName": "AutoResolveIntegrationRuntime",
 									"type": "IntegrationRuntimeReference"
 								},
-								"body": "@variables('auditRecord')\n"
+								"body": "@variables('auditRecord')\n",
+								"authentication": {
+									"type": "Basic",
+									"username": "osbkeyvault",
+									"password": {
+										"type": "AzureKeyVaultSecret",
+										"store": {
+											"referenceName": "AzureKeyVault1",
+											"type": "LinkedServiceReference"
+										},
+										"secretName": "sp-rm-adw-secret"
+									}
+								}
 							}
 						}
 					]
