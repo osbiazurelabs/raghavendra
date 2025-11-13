@@ -100,7 +100,7 @@
 									"type": "DelimitedTextSource",
 									"storeSettings": {
 										"type": "HttpReadSettings",
-										"maxConcurrentConnections": 1,
+										"maxConcurrentConnections": 5,
 										"requestMethod": "GET",
 										"requestTimeout": ""
 									},
