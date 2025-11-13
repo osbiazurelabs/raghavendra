@@ -158,7 +158,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"folderPath": {
-											"value": "@concat(\n    'raw/',\n    pipeline().parameters.source_system,\n    '/',\n    formatDateTime(utcNow(),'yyyy/MM/dd')\n)\n",
+											"value": "@concat('raw/', pipeline().globalParameters.source_system, '/', formatDateTime(utcNow(),'yyyy/MM/dd'))\n",
 											"type": "Expression"
 										}
 									}
