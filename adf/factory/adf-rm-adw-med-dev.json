@@ -1,20 +1,9 @@
 {
 	"name": "adf-rm-adw-med-dev",
-	"properties": {
-		"globalParameters": {
-			"source_system": {
-				"type": "string",
-				"value": "RM_ADW"
-			}
-		},
-		"globalConfigurations": {
-			"PipelineBillingEnabled": "false"
-		}
-	},
 	"location": "eastus",
 	"identity": {
 		"type": "SystemAssigned",
-		"principalId": "bd13b1f6-b16e-4192-8420-e1b4599d8ddf",
+		"principalId": "c842700f-091b-4ad8-b87f-322adf702de6",
 		"tenantId": "0223fd63-dec0-4282-accb-460fb4f20168"
 	}
 }
