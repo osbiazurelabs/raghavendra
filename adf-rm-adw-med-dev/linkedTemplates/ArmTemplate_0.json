@@ -15,21 +15,13 @@
 			"type": "string",
 			"defaultValue": "https://osbkeyvault.vault.azure.net/"
 		},
-		"LS_GitHub_http_properties_typeProperties_url": {
-			"type": "string",
-			"defaultValue": "https://api.github.com"
-		},
-		"adlsrmadwdev_privat_end_properties_privateLinkResourceId": {
-			"type": "string",
-			"defaultValue": "/subscriptions/f2dcf14e-c010-4080-bb14-de61bf467b98/resourceGroups/rg-rm-adw-med-dev/providers/Microsoft.Storage/storageAccounts/adlsrmadwdev"
-		},
-		"adlsrmadwdev_privat_end_properties_groupId": {
-			"type": "string",
-			"defaultValue": "dfs"
-		},
 		"LS_ADLS_RM_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://adlsrmadwdev.dfs.core.windows.net/"
+		},
+		"LS_GitHub_http_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://api.github.com"
 		},
 		"ls_git_raw_http_properties_typeProperties_url": {
 			"type": "string",
@@ -38,6 +30,14 @@
 		"ls_git_raw_http_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "sqladminuser"
+		},
+		"adlsrmadwdev_privat_end_properties_privateLinkResourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/f2dcf14e-c010-4080-bb14-de61bf467b98/resourceGroups/rg-rm-adw-med-dev/providers/Microsoft.Storage/storageAccounts/adlsrmadwdev"
+		},
+		"adlsrmadwdev_privat_end_properties_groupId": {
+			"type": "string",
+			"defaultValue": "dfs"
 		}
 	},
 	"variables": {
@@ -58,6 +58,19 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/LS_ADLS_RM')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('LS_ADLS_RM_properties_typeProperties_url')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LS_GitHub_http')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
@@ -68,6 +81,26 @@
 					"url": "[parameters('LS_GitHub_http_properties_typeProperties_url')]",
 					"enableServerCertificateValidation": true,
 					"authenticationType": "Anonymous"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ls_git_raw_http')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "HttpServer",
+				"typeProperties": {
+					"url": "[parameters('ls_git_raw_http_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Basic",
+					"userName": "[parameters('ls_git_raw_http_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('ls_git_raw_http_password')]"
+					}
 				}
 			},
 			"dependsOn": []
@@ -107,6 +140,52 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LS_GitHub_http')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ds_adls_raw_csv')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LS_ADLS_RM",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"folderPath": {
+						"type": "string"
+					},
+					"fileName": {
+						"type": "string"
+					},
+					"delimiter": {
+						"type": "string"
+					},
+					"hasHeader": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@dataset().fileName",
+							"type": "Expression"
+						},
+						"folderPath": "raw",
+						"fileSystem": "project"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_RM')]"
 			]
 		},
 		{
@@ -154,28 +233,54 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AutoResolveIntegrationRuntime')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"name": "[concat(parameters('factoryName'), '/ds_github_raw_file')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"type": "Managed",
-				"typeProperties": {
-					"computeProperties": {
-						"location": "AutoResolve",
-						"dataFlowProperties": {
-							"computeType": "General",
-							"coreCount": 8,
-							"timeToLive": 0
-						}
+				"linkedServiceName": {
+					"referenceName": "ls_git_raw_http",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"owner": {
+						"type": "string",
+						"defaultValue": "microsoft"
+					},
+					"repo": {
+						"type": "string",
+						"defaultValue": "sql-server-samples"
+					},
+					"branch": {
+						"type": "string",
+						"defaultValue": "master"
+					},
+					"path": {
+						"type": "string",
+						"defaultValue": "samples/databases/adventure-works/oltp-install-script"
+					},
+					"fileName": {
+						"type": "string"
 					}
 				},
-				"managedVirtualNetwork": {
-					"type": "ManagedVirtualNetworkReference",
-					"referenceName": "default"
-				}
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "HttpServerLocation",
+						"relativeUrl": {
+							"value": "@concat(\n  '/', \n  dataset().owner, '/', \n  dataset().repo, '/', \n  dataset().branch, '/', \n  dataset().path\n)\n",
+							"type": "Expression"
+						}
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": false,
+					"quoteChar": "\""
+				},
+				"schema": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/managedVirtualNetworks/default')]"
+				"[concat(variables('factoryId'), '/linkedServices/ls_git_raw_http')]"
 			]
 		},
 		{
@@ -618,148 +723,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/DS_GitHub_ListFiles_http')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/LS_ADLS_RM')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobFS",
-				"typeProperties": {
-					"url": "[parameters('LS_ADLS_RM_properties_typeProperties_url')]"
-				},
-				"connectVia": {
-					"referenceName": "AutoResolveIntegrationRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ls_git_raw_http')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "HttpServer",
-				"typeProperties": {
-					"url": "[parameters('ls_git_raw_http_properties_typeProperties_url')]",
-					"enableServerCertificateValidation": true,
-					"authenticationType": "Basic",
-					"userName": "[parameters('ls_git_raw_http_properties_typeProperties_userName')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('ls_git_raw_http_password')]"
-					}
-				},
-				"connectVia": {
-					"referenceName": "AutoResolveIntegrationRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_adls_raw_csv')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "LS_ADLS_RM",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"folderPath": {
-						"type": "string"
-					},
-					"fileName": {
-						"type": "string"
-					},
-					"delimiter": {
-						"type": "string"
-					},
-					"hasHeader": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobFSLocation",
-						"fileName": {
-							"value": "@dataset().fileName",
-							"type": "Expression"
-						},
-						"folderPath": "raw",
-						"fileSystem": "project"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": false,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_ADLS_RM')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ds_github_raw_file')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "ls_git_raw_http",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"owner": {
-						"type": "string",
-						"defaultValue": "microsoft"
-					},
-					"repo": {
-						"type": "string",
-						"defaultValue": "sql-server-samples"
-					},
-					"branch": {
-						"type": "string",
-						"defaultValue": "master"
-					},
-					"path": {
-						"type": "string",
-						"defaultValue": "samples/databases/adventure-works/oltp-install-script"
-					},
-					"fileName": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "HttpServerLocation",
-						"relativeUrl": {
-							"value": "@concat(\n  '/', \n  dataset().owner, '/', \n  dataset().repo, '/', \n  dataset().branch, '/', \n  dataset().path\n)\n",
-							"type": "Expression"
-						}
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": false,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/ls_git_raw_http')]"
 			]
 		},
 		{
@@ -1225,10 +1188,6 @@
 											"value": "@concat(\n  'https://adlsrmadwdev.blob.core.windows.net/project/audit/',\n  pipeline().parameters.source_system, '/',\n  formatDateTime(utcNow(),'yyyy/MM/dd'), '/',\n  'audit_', replace(item().name,'.csv',''), '.json'\n)\n",
 											"type": "Expression"
 										},
-										"connectVia": {
-											"referenceName": "AutoResolveIntegrationRuntime",
-											"type": "IntegrationRuntimeReference"
-										},
 										"body": {
 											"value": "@variables('auditRecord')\n",
 											"type": "Expression"
@@ -1287,7 +1246,6 @@
 				"[concat(variables('factoryId'), '/datasets/ds_github_list')]",
 				"[concat(variables('factoryId'), '/datasets/ds_github_raw_file')]",
 				"[concat(variables('factoryId'), '/datasets/ds_adls_raw_csv')]",
-				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
 				"[concat(variables('factoryId'), '/linkedServices/AzureKeyVault1')]"
 			]
 		},
@@ -1528,10 +1486,6 @@
 											"value": "https://adlsrmadwdev.table.core.windows.net/test",
 											"type": "Expression"
 										},
-										"connectVia": {
-											"referenceName": "AutoResolveIntegrationRuntime",
-											"type": "IntegrationRuntimeReference"
-										},
 										"body": {
 											"value": "@json(concat(\n  '{',\n    '\"PartitionKey\":\"', pipeline().parameters.source_system,'\",',\n    '\"RowKey\":\"', replace(formatDateTime(utcNow(),'yyyy-MM-ddTHH:mm:ssZ'),':','-'),'_', replace(item().name,'.csv',''),'\\\",',\n    '\"CSV_File_Name\":\"', item().name,'\",',\n    '\"Raw_GitHub_URL\":\"', item().download_url,'\",',\n    '\"Target_Path\":\"', concat('project/raw/', pipeline().parameters.source_system, '/', formatDateTime(utcNow(),'yyyy/MM/dd'), '/', item().name), '\",',\n    '\"Load_Status\":\"', if(greater(int(coalesce(string(activity('CopyFileToRaw').output.filesWritten),'0')), 0), 'SUCCESS', 'FAILED'),'\",\"',\n    '\"Load_Timestamp\":\"', formatDateTime(utcNow(),'yyyy-MM-ddTHH:mm:ssZ'), '\"',\n  '}'\n))\n",
 											"type": "Expression"
@@ -1590,7 +1544,6 @@
 				"[concat(variables('factoryId'), '/datasets/ds_github_list')]",
 				"[concat(variables('factoryId'), '/datasets/ds_github_raw_file')]",
 				"[concat(variables('factoryId'), '/datasets/ds_adls_raw_csv')]",
-				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
 				"[concat(variables('factoryId'), '/linkedServices/AzureKeyVault1')]"
 			]
 		}

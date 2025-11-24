@@ -72,23 +72,23 @@
 					"AzureKeyVault1_properties_typeProperties_baseUrl": {
 						"value": "[parameters('AzureKeyVault1_properties_typeProperties_baseUrl')]"
 					},
-					"LS_GitHub_http_properties_typeProperties_url": {
-						"value": "[parameters('LS_GitHub_http_properties_typeProperties_url')]"
-					},
-					"adlsrmadwdev_privat_end_properties_privateLinkResourceId": {
-						"value": "[parameters('adlsrmadwdev_privat_end_properties_privateLinkResourceId')]"
-					},
-					"adlsrmadwdev_privat_end_properties_groupId": {
-						"value": "[parameters('adlsrmadwdev_privat_end_properties_groupId')]"
-					},
 					"LS_ADLS_RM_properties_typeProperties_url": {
 						"value": "[parameters('LS_ADLS_RM_properties_typeProperties_url')]"
+					},
+					"LS_GitHub_http_properties_typeProperties_url": {
+						"value": "[parameters('LS_GitHub_http_properties_typeProperties_url')]"
 					},
 					"ls_git_raw_http_properties_typeProperties_url": {
 						"value": "[parameters('ls_git_raw_http_properties_typeProperties_url')]"
 					},
 					"ls_git_raw_http_properties_typeProperties_userName": {
 						"value": "[parameters('ls_git_raw_http_properties_typeProperties_userName')]"
+					},
+					"adlsrmadwdev_privat_end_properties_privateLinkResourceId": {
+						"value": "[parameters('adlsrmadwdev_privat_end_properties_privateLinkResourceId')]"
+					},
+					"adlsrmadwdev_privat_end_properties_groupId": {
+						"value": "[parameters('adlsrmadwdev_privat_end_properties_groupId')]"
 					}
 				}
 			},

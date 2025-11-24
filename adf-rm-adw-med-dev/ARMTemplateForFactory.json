@@ -937,10 +937,6 @@
 											"value": "@concat(\n  'https://adlsrmadwdev.blob.core.windows.net/project/audit/',\n  pipeline().parameters.source_system, '/',\n  formatDateTime(utcNow(),'yyyy/MM/dd'), '/',\n  'audit_', replace(item().name,'.csv',''), '.json'\n)\n",
 											"type": "Expression"
 										},
-										"connectVia": {
-											"referenceName": "AutoResolveIntegrationRuntime",
-											"type": "IntegrationRuntimeReference"
-										},
 										"body": {
 											"value": "@variables('auditRecord')\n",
 											"type": "Expression"
@@ -999,7 +995,6 @@
 				"[concat(variables('factoryId'), '/datasets/ds_github_list')]",
 				"[concat(variables('factoryId'), '/datasets/ds_github_raw_file')]",
 				"[concat(variables('factoryId'), '/datasets/ds_adls_raw_csv')]",
-				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
 				"[concat(variables('factoryId'), '/linkedServices/AzureKeyVault1')]"
 			]
 		},
@@ -1240,10 +1235,6 @@
 											"value": "https://adlsrmadwdev.table.core.windows.net/test",
 											"type": "Expression"
 										},
-										"connectVia": {
-											"referenceName": "AutoResolveIntegrationRuntime",
-											"type": "IntegrationRuntimeReference"
-										},
 										"body": {
 											"value": "@json(concat(\n  '{',\n    '\"PartitionKey\":\"', pipeline().parameters.source_system,'\",',\n    '\"RowKey\":\"', replace(formatDateTime(utcNow(),'yyyy-MM-ddTHH:mm:ssZ'),':','-'),'_', replace(item().name,'.csv',''),'\\\",',\n    '\"CSV_File_Name\":\"', item().name,'\",',\n    '\"Raw_GitHub_URL\":\"', item().download_url,'\",',\n    '\"Target_Path\":\"', concat('project/raw/', pipeline().parameters.source_system, '/', formatDateTime(utcNow(),'yyyy/MM/dd'), '/', item().name), '\",',\n    '\"Load_Status\":\"', if(greater(int(coalesce(string(activity('CopyFileToRaw').output.filesWritten),'0')), 0), 'SUCCESS', 'FAILED'),'\",\"',\n    '\"Load_Timestamp\":\"', formatDateTime(utcNow(),'yyyy-MM-ddTHH:mm:ssZ'), '\"',\n  '}'\n))\n",
 											"type": "Expression"
@@ -1302,7 +1293,6 @@
 				"[concat(variables('factoryId'), '/datasets/ds_github_list')]",
 				"[concat(variables('factoryId'), '/datasets/ds_github_raw_file')]",
 				"[concat(variables('factoryId'), '/datasets/ds_adls_raw_csv')]",
-				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
 				"[concat(variables('factoryId'), '/linkedServices/AzureKeyVault1')]"
 			]
 		},
@@ -1499,15 +1489,9 @@
 				"type": "AzureBlobFS",
 				"typeProperties": {
 					"url": "[parameters('LS_ADLS_RM_properties_typeProperties_url')]"
-				},
-				"connectVia": {
-					"referenceName": "AutoResolveIntegrationRuntime",
-					"type": "IntegrationRuntimeReference"
 				}
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LS_GitHub_http')]",
@@ -1540,40 +1524,9 @@
 						"type": "SecureString",
 						"value": "[parameters('ls_git_raw_http_password')]"
 					}
-				},
-				"connectVia": {
-					"referenceName": "AutoResolveIntegrationRuntime",
-					"type": "IntegrationRuntimeReference"
 				}
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AutoResolveIntegrationRuntime')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "Managed",
-				"typeProperties": {
-					"computeProperties": {
-						"location": "AutoResolve",
-						"dataFlowProperties": {
-							"computeType": "General",
-							"coreCount": 8,
-							"timeToLive": 0
-						}
-					}
-				},
-				"managedVirtualNetwork": {
-					"type": "ManagedVirtualNetworkReference",
-					"referenceName": "default"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/managedVirtualNetworks/default')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/default')]",
